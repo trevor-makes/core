@@ -1,0 +1,22 @@
+{
+  "name": "core",
+  "version": "0.0.0",
+  "description": "core is a framework for building rich microcontroller applications",
+  "keywords": "",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/trevor-makes/core.git"
+  },
+  "authors":
+  [
+    {
+      "name": "Trevor Makes",
+      "email": "the.trevor.makes@gmail.com",
+      "maintainer": true
+    }
+  ],
+  "frameworks": "arduino",
+  "platforms": "atmelavr",
+  "dependencies": []
+}
