@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include <avr/io.h>
 #include <stdint.h>
 
 #include "uIO/util.hpp"
@@ -299,6 +298,8 @@ using BitExtend = Overlay<
   LeftShift<RightAlign<PORT_MSB>, util::mask_width(RightAlign<PORT_LSB>::MASK)>,
   RightAlign<PORT_LSB>>;
 
+} // namespace uIO
+
 #define uIO_REG(REG) \
   using TYPE_##REG = util::remove_volatile_reference<decltype((REG))>::type; \
   \
@@ -393,22 +394,4 @@ using BitExtend = Overlay<
 // Define Reg[DDR#X, PORT#X, PIN#X], Port#X
 #define uIO_PORT(X) \
   uIO_REG(DDR##X) uIO_REG(PORT##X) uIO_REG(PIN##X) \
-  using Port##X = Port<RegDDR##X, RegPORT##X, RegPIN##X>;
-
-// TODO include other registers, or just I/O?
-// TODO define masks for ports with less than 8 pins?
-// TODO ^ macro to generate PinXN only for unmasked pins?
-// ^^ maybe remove PinXN from port macro and just manually generate Arduino digital pin defs?
-#if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_NANO)
-uIO_PORT(B);
-uIO_PORT(C);
-uIO_PORT(D);
-#elif defined(ARDUINO_AVR_MICRO)
-uIO_PORT(B);
-uIO_PORT(C);
-uIO_PORT(D);
-uIO_PORT(E);
-uIO_PORT(F);
-#endif
-
-} // namespace uIO
+  using Port##X = uIO::Port<RegDDR##X, RegPORT##X, RegPIN##X>;

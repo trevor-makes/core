@@ -3,7 +3,6 @@
 #include "uDMA.hpp"
 #include "uIO.hpp"
 
-#include <Arduino.h>
 #include <stdint.h>
 
 namespace uDMA {
