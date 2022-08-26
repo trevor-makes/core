@@ -4,16 +4,26 @@
 
 #include <stdint.h>
 
+namespace util {
+
 // min is defined as a macro in Arduino.h, so undef just in case
 #ifdef min
 #undef min
 #endif
 
-namespace util {
-
 template <typename T>
 T min(T a, T b) {
   return a < b ? a : b;
+}
+
+// max is defined as a macro in Arduino.h, so undef just in case
+#ifdef max
+#undef max
+#endif
+
+template <typename T>
+T max(T a, T b) {
+  return a > b ? a : b;
 }
 
 // Convert type <volatile T&> to T
@@ -149,5 +159,33 @@ static_assert(countl_zero(uint32_t(1)) == 31, "");
 static_assert(countl_zero(uint32_t(0x80000000)) == 0, "");
 static_assert(countl_zero(uint32_t(0xF0F0F0F0)) == 0, "");
 static_assert(countl_zero(uint32_t(0x0F0F0F0F)) == 4, "");
+
+// Fill array with function arguments
+template <uint8_t I = 0, typename T1, typename T2, uint8_t N>
+void copy_from_args(T1 (&into)[N], const T2 from) {
+  static_assert(I < N, "Too many args");
+  into[I] = from;
+}
+
+// Fill array with function arguments
+template <uint8_t I = 0, typename T1, typename T2, uint8_t N, typename... Args>
+void copy_from_args(T1 (&into)[N], const T2 from, const Args... args) {
+  copy_from_args<I>(into, from);
+  copy_from_args<I + 1>(into, args...);
+}
+
+// Copy from array into function arguments
+template <uint8_t I = 0, typename T1, typename T2, uint8_t N>
+void copy_into_args(const T1 (&from)[N], T2& into) {
+  static_assert(I < N, "Too many args");
+  into = from[I];
+}
+
+// Copy from array into function arguments
+template <uint8_t I = 0, typename T1, typename T2, uint8_t N, typename... Args>
+void copy_into_args(const T1 (&from)[N], T2& into, Args&... args) {
+  copy_into_args<I>(from, into);
+  copy_into_args<I + 1>(from, args...);
+}
 
 } // namespace util
