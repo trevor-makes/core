@@ -1,11 +1,11 @@
-// https://github.com/trevor-makes/uMon.git
 // Copyright (c) 2022 Trevor Makes
 
 #pragma once
 
-#include "uMon/format.hpp"
+#include "core/mon/format.hpp"
 
-namespace uMon {
+namespace core {
+namespace mon {
 namespace z80 {
 
 constexpr const uint8_t PREFIX_IX = 0xDD;
@@ -410,4 +410,5 @@ void print_instruction(Instruction& inst) {
 }
 
 } // namespace z80
-} // namespace uMon
+} // namespace mon
+} // namespace core

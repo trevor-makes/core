@@ -1,15 +1,15 @@
-// https://github.com/trevor-makes/uMon.git
 // Copyright (c) 2022 Trevor Makes
 
 #pragma once
 
-#include "uMon/z80/common.hpp"
-#include "uMon/format.hpp"
+#include "common.hpp"
+#include "core/mon/format.hpp"
 #include "core/cli.hpp"
 
 #include <stdint.h>
 
-namespace uMon {
+namespace core {
+namespace mon {
 namespace z80 {
 
 template <typename API>
@@ -677,4 +677,5 @@ uint8_t asm_instruction(Instruction& inst, uint16_t addr) {
 }
 
 } // namespace z80
-} // namespace uMon
+} // namespace mon
+} // namespace core

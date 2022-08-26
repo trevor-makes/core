@@ -1,11 +1,11 @@
-// https://github.com/trevor-makes/uMon.git
 // Copyright (c) 2022 Trevor Makes
 
 #pragma once
 
 #include <stdint.h>
 
-namespace uMon {
+namespace core {
+namespace mon {
 
 // This data structure allocates key-value pairs within a fixed size buffer
 // TODO sort by address for binary search on dasm
@@ -47,4 +47,5 @@ public:
   LabelsOwner(): Labels(buffer_) {}
 };
 
-} // namespace uMon
+} // namespace mon
+} // namespace core

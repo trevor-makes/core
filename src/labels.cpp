@@ -1,12 +1,12 @@
-// https://github.com/trevor-makes/uMon.git
 // Copyright (c) 2022 Trevor Makes
 
-#include "uMon/labels.hpp"
+#include "core/mon/labels.hpp"
 
 #include <stdlib.h>
 #include <string.h>
 
-namespace uMon {
+namespace core {
+namespace mon {
 
 char* Labels::get(uint8_t index, uint8_t& size) const {
   if (index >= entries_) {
@@ -145,4 +145,5 @@ bool Labels::set_label(const char* name, uint16_t addr) {
   return true;
 }
 
-} // namespace uMon
+} // namespace mon
+} // namespace core

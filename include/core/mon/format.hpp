@@ -1,4 +1,3 @@
-// https://github.com/trevor-makes/uMon.git
 // Copyright (c) 2022 Trevor Makes
 
 #pragma once
@@ -12,7 +11,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-namespace uMon {
+namespace core {
+namespace mon {
 
 // Parse unsigned value from string, returning true on success
 // Prints the string and returns false if invalid characters found
@@ -194,4 +194,5 @@ uint8_t pgm_bsearch(const char* const (&table)[N], const char* str) {
   uint16_t NAME; \
   if (!input_hex<API, 4>(NAME)) FAIL;
 
-} // namespace uMon
+} // namespace mon
+} // namespace core

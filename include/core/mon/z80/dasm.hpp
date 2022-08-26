@@ -1,4 +1,3 @@
-// https://github.com/trevor-makes/uMon.git
 // Copyright (c) 2022 Trevor Makes
 
 // 8080/Z80 (and even x86!) opcodes are organized by octal groupings
@@ -6,12 +5,13 @@
 
 #pragma once
 
-#include "uMon/z80/common.hpp"
-#include "uMon/format.hpp"
+#include "common.hpp"
+#include "core/mon/format.hpp"
 
 #include <stdint.h>
 
-namespace uMon {
+namespace core {
+namespace mon {
 namespace z80 {
 
 // Print given code as hex followed by '?'
@@ -560,4 +560,5 @@ uint16_t dasm_range(uint16_t addr, uint16_t end) {
 }
 
 } // namespace z80
-} // namespace uMon
+} // namespace mon
+} // namespace core

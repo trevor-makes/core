@@ -1,15 +1,15 @@
-#include "uMon/z80.hpp"
-#include "uMon/api.hpp"
+#include "core/mon/z80.hpp"
+#include "core/mon/api.hpp"
 
 #include <unity.h>
 
-using namespace uMon::z80;
+using namespace core::mon::z80;
 
 constexpr const uint16_t DATA_SIZE = 8;
 uint8_t test_data[DATA_SIZE];
 core::CursorOwner<16> test_io;
 
-struct TestAPI : public uMon::Base<TestAPI> {
+struct TestAPI : public core::mon::Base<TestAPI> {
   static void print_char(char c) { test_io.try_insert(c); }
   static void print_string(const char* str) { test_io.try_insert(str); }
   static void newline() { test_io.try_insert('\n'); }
@@ -197,7 +197,7 @@ void test_asm_ld_r(void) {
       asm_buf.try_insert(dst_str);
       asm_buf.try_insert(",$");
       uint8_t imm = dst * 8;
-      uMon::format_hex8([&](char c){asm_buf.try_insert(c);}, imm);
+      core::mon::format_hex8([&](char c){asm_buf.try_insert(c);}, imm);
       uint8_t code[2] = { uint8_t(0006 | dst << 3), imm };
       AsmTest test = {asm_buf.contents(), sizeof(code), (char*)code, {MNE_LD, {dst_tok}, {TOK_IMMEDIATE, imm}}};
       test_asm(test);
@@ -281,7 +281,7 @@ void test_asm_alu_r() {
       asm_buf.try_insert(alu_str);
       asm_buf.try_insert(" A,$");
       uint8_t imm = alu * 8;
-      uMon::format_hex8([&](char c){asm_buf.try_insert(c);}, imm);
+      core::mon::format_hex8([&](char c){asm_buf.try_insert(c);}, imm);
       uint8_t code[] = { uint8_t(0306 | alu << 3), imm };
       AsmTest test = {asm_buf.contents(), sizeof(code), (char*)code, {alu_mne, {TOK_A}, {TOK_IMMEDIATE, imm}}};
       test_asm(test);
@@ -329,7 +329,7 @@ void assert_sorted(const char* const (&table)[N]) {
     int cmp = strcasecmp(entry, table[i - 1]);
     TEST_ASSERT_TRUE_MESSAGE(cmp > 0, entry);
     // Assert each entry can be found by binary search
-    TEST_ASSERT_EQUAL_MESSAGE(i, uMon::pgm_bsearch(table, entry), entry);
+    TEST_ASSERT_EQUAL_MESSAGE(i, core::mon::pgm_bsearch(table, entry), entry);
   }
 }
 

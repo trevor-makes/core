@@ -1,4 +1,3 @@
-// https://github.com/trevor-makes/uMon.git
 // Copyright (c) 2022 Trevor Makes
 
 #pragma once
@@ -7,7 +6,8 @@
 #include "z80/dasm.hpp"
 #include "core/cli.hpp"
 
-namespace uMon {
+namespace core {
+namespace mon {
 namespace z80 {
 
 template <typename API>
@@ -106,4 +106,5 @@ void cmd_dasm(core::Args args) {
 }
 
 } // namespace z80
-} // namespace uMon
+} // namespace mon
+} // namespace core

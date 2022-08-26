@@ -1,16 +1,16 @@
-// https://github.com/trevor-makes/uMon.git
 // Copyright (c) 2022 Trevor Makes
 
 #pragma once
 
-#include "uMon/api.hpp"
-#include "uMon/format.hpp"
+#include "mon/api.hpp"
+#include "mon/format.hpp"
 #include "core/cli.hpp"
 
 #include <stdint.h>
 #include <ctype.h>
 
-namespace uMon {
+namespace core {
+namespace mon {
 
 // Dump memory as hex/ascii from row to end, inclusive
 template <typename API, uint8_t COL_SIZE = 16, uint8_t MAX_ROWS = 24>
@@ -238,4 +238,5 @@ void cmd_label(uCLI::Args args) {
   }
 }
 
-} // namespace uMon
+} // namespace mon
+} // namespace core
