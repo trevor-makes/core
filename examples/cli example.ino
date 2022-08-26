@@ -1,6 +1,6 @@
 #include <Arduino.h>
 
-#include "uCLI.hpp"
+#include "core/cli.hpp"
 
 using uCLI::CLI;
 using uCLI::Command;

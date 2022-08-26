@@ -1,7 +1,7 @@
 // https://github.com/trevor-makes/uANSI.git
 // Copyright (c) 2021 Trevor Makes
 
-#include "uANSI.hpp"
+#include "core/ansi.hpp"
 
 #include <ctype.h>
 

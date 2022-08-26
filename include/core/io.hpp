@@ -4,7 +4,7 @@
 
 #include <stdint.h>
 
-#include "uIO/util.hpp"
+#include "core/util.hpp"
 
 namespace uIO {
 

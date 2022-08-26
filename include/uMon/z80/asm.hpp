@@ -5,7 +5,7 @@
 
 #include "uMon/z80/common.hpp"
 #include "uMon/format.hpp"
-#include "uCLI.hpp"
+#include "core/cli.hpp"
 
 #include <stdint.h>
 

@@ -1,7 +1,7 @@
 // Copyright (c) 2021 Trevor Makes
 
-#include "uDMA.hpp"
-#include "uIO.hpp"
+#include "core/io/bus.hpp"
+#include "core/io.hpp"
 
 #include <stdint.h>
 

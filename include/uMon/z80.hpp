@@ -5,7 +5,7 @@
 
 #include "z80/asm.hpp"
 #include "z80/dasm.hpp"
-#include "uCLI.hpp"
+#include "core/cli.hpp"
 
 namespace uMon {
 namespace z80 {

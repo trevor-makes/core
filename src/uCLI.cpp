@@ -1,8 +1,8 @@
 // https://github.com/trevor-makes/uCLI.git
 // Copyright (c) 2021 Trevor Makes
 
-#include "uCLI.hpp"
-#include "uANSI.hpp"
+#include "core/cli.hpp"
+#include "core/ansi.hpp"
 
 // min is defined as a macro in Arduino.h, so undef just in case
 #ifdef min
@@ -11,6 +11,7 @@
 
 namespace uCLI {
 
+// TODO move to util.hpp
 // <algorithm> not available on AVR, so define our own min
 template <typename T>
 T min(T a, T b) {

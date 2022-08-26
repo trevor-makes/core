@@ -5,7 +5,7 @@
 
 #include "uMon/api.hpp"
 #include "uMon/format.hpp"
-#include "uCLI.hpp"
+#include "core/cli.hpp"
 
 #include <stdint.h>
 #include <ctype.h>
