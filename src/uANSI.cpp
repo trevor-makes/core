@@ -1,11 +1,10 @@
-// https://github.com/trevor-makes/uANSI.git
 // Copyright (c) 2021 Trevor Makes
 
 #include "core/ansi.hpp"
 
 #include <ctype.h>
 
-namespace uANSI {
+namespace core {
 
 int StreamEx::peek() {
   // Fill peek buffer if empty
@@ -246,8 +245,8 @@ void StreamEx::erase_char(uint8_t count) {
 
 void StreamEx::set_style(Style style) {
   stream_.write("\e[");
-  stream_.print(style);
+  stream_.print(uint8_t(style));
   stream_.write('m');
 }
 
-} // namespace uANSI
+} // namespace core

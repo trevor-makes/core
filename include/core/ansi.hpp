@@ -1,4 +1,3 @@
-// https://github.com/trevor-makes/uANSI.git
 // Copyright (c) 2021 Trevor Makes
 
 #pragma once
@@ -11,40 +10,30 @@
 
 #include <stdint.h>
 
-namespace uANSI {
+namespace core {
 
 // Styles supported by `set_style`
-enum Style {
-  STYLE_DEFAULT   = 0,
-  STYLE_BOLD      = 1,
-  STYLE_FAINT     = 2,
-  STYLE_ITALIC    = 3,
-  STYLE_UNDERLINE = 4,
-  STYLE_BLINK     = 5,
-  STYLE_INVERSE   = 7,
+enum class Style {
+  DEFAULT   = 0,
+  BOLD      = 1,
+  FAINT     = 2,
+  ITALIC    = 3,
+  UNDERLINE = 4,
+  BLINK     = 5,
+  INVERSE   = 7,
 };
 
 // Colors supported by `set_foreground` and `set_background`
-enum Color {
-  COLOR_BLACK   = 0,
-  COLOR_RED     = 1,
-  COLOR_GREEN   = 2,
-  COLOR_YELLOW  = 3,
-  COLOR_BLUE    = 4,
-  COLOR_MAGENTA = 5,
-  COLOR_CYAN    = 6,
-  COLOR_WHITE   = 7,
-  COLOR_DEFAULT = 9,
-};
-
-// Extended key codes returned by `StreamEx::read`
-enum Key {
-  KEY_UP    = 0x100,
-  KEY_DOWN  = 0x101,
-  KEY_RIGHT = 0x102,
-  KEY_LEFT  = 0x103,
-  KEY_END   = 0x104,
-  KEY_HOME  = 0x105,
+enum class Color {
+  BLACK   = 0,
+  RED     = 1,
+  GREEN   = 2,
+  YELLOW  = 3,
+  BLUE    = 4,
+  MAGENTA = 5,
+  CYAN    = 6,
+  WHITE   = 7,
+  DEFAULT = 9,
 };
 
 class StreamEx : public Stream {
@@ -59,6 +48,16 @@ class StreamEx : public Stream {
   } state_ = State::RESET;
 
 public:
+  // Extended key codes returned by `read`
+  enum Key {
+    KEY_UP    = 0x100,
+    KEY_DOWN  = 0x101,
+    KEY_RIGHT = 0x102,
+    KEY_LEFT  = 0x103,
+    KEY_END   = 0x104,
+    KEY_HOME  = 0x105,
+  };
+
   StreamEx(Stream& stream): stream_{stream} {}
 
   // Make type non-copyable
@@ -107,13 +106,13 @@ public:
 
   // Set the text color
   void set_foreground(Color color) {
-    set_style(Style(30 + color));
+    set_style(Style(30 + uint8_t(color)));
   }
 
   // Set the background color
   void set_background(Color color) {
-    set_style(Style(40 + color));
+    set_style(Style(40 + uint8_t(color)));
   }
 };
 
-} // namespace uANSI
+} // namespace core

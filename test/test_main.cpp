@@ -7,7 +7,7 @@ using namespace uMon::z80;
 
 constexpr const uint16_t DATA_SIZE = 8;
 uint8_t test_data[DATA_SIZE];
-uCLI::CursorOwner<16> test_io;
+core::CursorOwner<16> test_io;
 
 struct TestAPI : public uMon::Base<TestAPI> {
   static void print_char(char c) { test_io.try_insert(c); }
@@ -35,7 +35,7 @@ void test_asm(const AsmTest& test) {
   // Prepare CLI tokens for assembler
   test_io.clear();
   test_io.try_insert(test.str);
-  uCLI::Tokens args(test_io.contents());
+  core::Tokens args(test_io.contents());
 
   // Parse instruction from CLI tokens and validate
   Instruction inst_in;
@@ -169,7 +169,7 @@ void test_asm_misc(void) {
 // NOTE can't use TOK_STR since (HL) is encoded as TOK_HL | TOK_INDIRECT
 const char* REG_STR[] = { "B", "C", "D", "E", "H", "L", "(HL)", "A" };
 
-uCLI::CursorOwner<16> asm_buf;
+core::CursorOwner<16> asm_buf;
 
 void test_asm_ld_r(void) {
   // Test LD r,r

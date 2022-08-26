@@ -4,7 +4,17 @@
 
 #include <stdint.h>
 
+// min is defined as a macro in Arduino.h, so undef just in case
+#ifdef min
+#undef min
+#endif
+
 namespace util {
+
+template <typename T>
+T min(T a, T b) {
+  return a < b ? a : b;
+}
 
 // Convert type <volatile T&> to T
 template <typename>

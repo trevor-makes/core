@@ -5,7 +5,7 @@
 
 #include <stdint.h>
 
-namespace uDMA {
+namespace core {
 
 #if defined(ARDUINO_AVR_MICRO)
 
@@ -58,4 +58,4 @@ bool is_halted() {
 
 #endif
 
-} // namespace uDMA
+} // namespace core

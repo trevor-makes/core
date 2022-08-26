@@ -2,13 +2,15 @@
 
 #include <Arduino.h>
 
+CORE_PORT(B)
+CORE_PORT(C)
+CORE_PORT(D)
+
 void copy_portC_to_portD() {
     // Configure I/O port C as input
-    using PortC = uIO::PortC;
     PortC::config_input(); // DDRC = 0x00; PORTC = 0x00; [OUT, OUT]
 
     // Configure I/O port D as output
-    using PortD = uIO::PortD;
     PortD::config_output(); // DDRD = 0xFF; [LDI, OUT]
 
     // Read from port C and write value to port D
@@ -16,7 +18,7 @@ void copy_portC_to_portD() {
 }
 
 // True for Arduino Uno; use different pin for other boards
-using LEDPin = uIO::PinB5;
+using LEDPin = PortB::Bit<5>;
 
 void setup() {
     // Configure pin as output

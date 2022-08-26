@@ -1,22 +1,10 @@
-// https://github.com/trevor-makes/uCLI.git
 // Copyright (c) 2021 Trevor Makes
 
 #include "core/cli.hpp"
 #include "core/ansi.hpp"
+#include "core/util.hpp"
 
-// min is defined as a macro in Arduino.h, so undef just in case
-#ifdef min
-#undef min
-#endif
-
-namespace uCLI {
-
-// TODO move to util.hpp
-// <algorithm> not available on AVR, so define our own min
-template <typename T>
-T min(T a, T b) {
-  return a < b ? a : b;
-}
+namespace core {
 
 bool Cursor::try_left() {
   if (cursor_ > 0) {
@@ -50,7 +38,7 @@ uint8_t Cursor::seek_end() {
 
 uint8_t Cursor::try_insert(const char* input, uint8_t size) {
   // Limit size to space available in Cursor
-  size = min(size, uint8_t(limit_ - length_));
+  size = util::min(size, uint8_t(limit_ - length_));
 
   // Limit size to null terminator in input
   for (uint8_t i = 0; i < size; ++i) {
@@ -113,7 +101,7 @@ void History::push(const Cursor& cursor) {
   }
 
   // Limit entry size to absolute size of history buffer (excluding prefix)
-  uint8_t size = min(cursor.length(), uint8_t(size_ - 1));
+  uint8_t size = util::min(cursor.length(), uint8_t(size_ - 1));
   uint8_t available = size_ - (size + 1);
 
   // Determine how many old entries will be overwritten
@@ -183,32 +171,32 @@ bool try_read(StreamEx& stream, Cursor& cursor, History& history) {
   switch (input) {
   case -1:
     break;
-  case uANSI::KEY_LEFT:
+  case StreamEx::KEY_LEFT:
     if (cursor.try_left()) {
       stream.cursor_left();
     }
     break;
-  case uANSI::KEY_RIGHT:
+  case StreamEx::KEY_RIGHT:
     if (cursor.try_right()) {
       stream.cursor_right();
     }
     break;
-  case uANSI::KEY_HOME:
+  case StreamEx::KEY_HOME:
     // Move cursor far left
     stream.cursor_left(cursor.seek_home());
     break;
-  case uANSI::KEY_END:
+  case StreamEx::KEY_END:
     // Move cursor far right
     stream.cursor_right(cursor.seek_end());
     break;
-  case uANSI::KEY_UP:
+  case StreamEx::KEY_UP:
     if (history.has_prev()) {
       clear_line(stream, cursor);
       history.copy_prev(cursor);
       stream.print(cursor.contents());
     }
     break;
-  case uANSI::KEY_DOWN:
+  case StreamEx::KEY_DOWN:
     clear_line(stream, cursor);
     if (history.has_next()) {
       history.copy_next(cursor);
@@ -281,4 +269,4 @@ const char* Tokens::next() {
   return prev.next_;
 }
 
-} // namespace uCLI
+} // namespace core

@@ -2,11 +2,9 @@
 
 #pragma once
 
-#include "core/io.hpp"
-
 #include <stdint.h>
 
-namespace uDMA {
+namespace core {
 
 // Typical SRAM interface with active-low control lines
 template <typename CHIP_SELECT, typename OUTPUT_ENABLE, typename WRITE_ENABLE>
@@ -136,4 +134,4 @@ void enable_clock(bool enable);
 // Read the HALT signal from the Z80
 bool is_halted();
 
-} // namespace uDMA
+} // namespace core
