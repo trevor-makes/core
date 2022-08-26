@@ -2,7 +2,10 @@
 
 #pragma once
 
+// TODO this isn't strictly needed here; should user include it instead?
 #include <avr/io.h>
+
+#include "core/util.hpp"
 
 #define CORE_REG(REG) \
   using TYPE_##REG = util::remove_volatile_reference<decltype((REG))>::type; \
@@ -97,8 +100,8 @@
 
 // Define Reg[DDR#X, PORT#X, PIN#X], Port#X
 #define CORE_PORT(X) \
-  uIO_REG(DDR##X) uIO_REG(PORT##X) uIO_REG(PIN##X) \
-  using Port##X = uIO::Port<RegDDR##X, RegPORT##X, RegPIN##X>;
+  CORE_REG(DDR##X) CORE_REG(PORT##X) CORE_REG(PIN##X) \
+  using Port##X = core::Port<RegDDR##X, RegPORT##X, RegPIN##X>;
 
 namespace core {
 
