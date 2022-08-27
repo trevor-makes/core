@@ -4,10 +4,11 @@
 #include <unity.h>
 
 using namespace core::mon::z80;
+using namespace core::cli;
 
 constexpr const uint16_t DATA_SIZE = 8;
 uint8_t test_data[DATA_SIZE];
-core::CursorOwner<16> test_io;
+CursorOwner<16> test_io;
 
 struct TestAPI : public core::mon::Base<TestAPI> {
   static void print_char(char c) { test_io.try_insert(c); }
@@ -35,7 +36,7 @@ void test_asm(const AsmTest& test) {
   // Prepare CLI tokens for assembler
   test_io.clear();
   test_io.try_insert(test.str);
-  core::Tokens args(test_io.contents());
+  Tokens args(test_io.contents());
 
   // Parse instruction from CLI tokens and validate
   Instruction inst_in;
@@ -169,7 +170,7 @@ void test_asm_misc(void) {
 // NOTE can't use TOK_STR since (HL) is encoded as TOK_HL | TOK_INDIRECT
 const char* REG_STR[] = { "B", "C", "D", "E", "H", "L", "(HL)", "A" };
 
-core::CursorOwner<16> asm_buf;
+CursorOwner<16> asm_buf;
 
 void test_asm_ld_r(void) {
   // Test LD r,r

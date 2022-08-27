@@ -11,6 +11,7 @@
 #endif
 
 namespace core {
+namespace io {
 
 // Virtual port that discards writes
 template <typename T = uint8_t>
@@ -253,4 +254,5 @@ using BitExtend = Overlay<
   LeftShift<RightAlign<PORT_MSB>, util::mask_width(RightAlign<PORT_LSB>::MASK)>,
   RightAlign<PORT_LSB>>;
 
+} // namespace io
 } // namespace core

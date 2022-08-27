@@ -135,7 +135,7 @@ bool read_ihx_data(uint8_t rec_size, uint16_t address, uint8_t checksum) {
 
 // Read serial data from IHX format into memory
 template <typename API>
-void cmd_load(uCLI::Args) {
+void cmd_load(cli::Args) {
   for (;;) {
     // Discard whitespace while looking for start of record (:)
     char c;
@@ -158,7 +158,7 @@ void cmd_load(uCLI::Args) {
 }
 
 template <typename API, uint8_t COL_SIZE = 16, uint8_t MAX_ROWS = 24>
-void cmd_hex(uCLI::Args args) {
+void cmd_hex(cli::Args args) {
   // Default size to one row if not provided
   uMON_EXPECT_ADDR(API, uint16_t, start, args, return);
   uMON_OPTION_UINT(API, uint16_t, size, COL_SIZE, args, return);
@@ -171,7 +171,7 @@ void cmd_hex(uCLI::Args args) {
 }
 
 template <typename API>
-void cmd_set(uCLI::Args args) {
+void cmd_set(cli::Args args) {
   uMON_EXPECT_ADDR(API, uint16_t, start, args, return);
   do {
     if (args.is_string()) {
@@ -185,7 +185,7 @@ void cmd_set(uCLI::Args args) {
 }
 
 template <typename API>
-void cmd_fill(uCLI::Args args) {
+void cmd_fill(cli::Args args) {
   uMON_EXPECT_ADDR(API, uint16_t, start, args, return);
   uMON_EXPECT_UINT(API, uint16_t, size, args, return);
   uMON_EXPECT_UINT(API, uint8_t, pattern, args, return);
@@ -193,7 +193,7 @@ void cmd_fill(uCLI::Args args) {
 }
 
 template <typename API>
-void cmd_move(uCLI::Args args) {
+void cmd_move(cli::Args args) {
   uMON_EXPECT_ADDR(API, uint16_t, start, args, return);
   uMON_EXPECT_UINT(API, uint16_t, size, args, return);
   uMON_EXPECT_ADDR(API, uint16_t, dest, args, return);
@@ -201,14 +201,14 @@ void cmd_move(uCLI::Args args) {
 }
 
 template <typename API, uint8_t REC_SIZE = 32>
-void cmd_save(uCLI::Args args) {
+void cmd_save(cli::Args args) {
   uMON_EXPECT_ADDR(API, uint16_t, start, args, return);
   uMON_EXPECT_UINT(API, uint16_t, size, args, return);
   impl_save<API, REC_SIZE>(start, size);
 }
 
 template <typename API>
-void cmd_label(uCLI::Args args) {
+void cmd_label(cli::Args args) {
   auto& labels = API::get_labels();
   if (args.has_next()) {
     const char* name = args.next();

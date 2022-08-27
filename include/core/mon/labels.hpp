@@ -9,7 +9,7 @@ namespace mon {
 
 // This data structure allocates key-value pairs within a fixed size buffer
 // TODO sort by address for binary search on dasm
-// TODO maybe refactor with uCLI::History
+// TODO maybe refactor with cli::History
 class Labels {
   char* buffer_;
   uint8_t buf_size_;

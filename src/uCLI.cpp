@@ -1,10 +1,11 @@
 // Copyright (c) 2021 Trevor Makes
 
 #include "core/cli.hpp"
-#include "core/ansi.hpp"
+#include "core/serial.hpp"
 #include "core/util.hpp"
 
 namespace core {
+namespace cli {
 
 bool Cursor::try_left() {
   if (cursor_ > 0) {
@@ -160,13 +161,14 @@ void History::copy_next(Cursor& cursor) {
 }
 
 // Move cursor far left and delete line
-inline void clear_line(StreamEx& stream, Cursor& cursor) {
+inline void clear_line(serial::StreamEx& stream, Cursor& cursor) {
   stream.cursor_left(cursor.seek_home());
   stream.delete_char(cursor.length());
   cursor.clear();
 }
 
-bool try_read(StreamEx& stream, Cursor& cursor, History& history) {
+bool try_read(serial::StreamEx& stream, Cursor& cursor, History& history) {
+  using serial::StreamEx;
   int input = stream.read();
   switch (input) {
   case -1:
@@ -210,7 +212,7 @@ bool try_read(StreamEx& stream, Cursor& cursor, History& history) {
       stream.delete_char();
     }
     break;
-  case '\n': // NOTE uANSI transforms \r and \r\n to \n
+  case '\n': // NOTE StreamEx transforms \r and \r\n to \n
     if (cursor.length() > 0) {
       // Exit loop and execute command if line is not empty
       history.push(cursor);
@@ -269,4 +271,5 @@ const char* Tokens::next() {
   return prev.next_;
 }
 
+} // namespace cli
 } // namespace core

@@ -11,7 +11,7 @@ namespace mon {
 namespace z80 {
 
 template <typename API>
-bool parse_operand(Operand& op, core::Tokens tokens) {
+bool parse_operand(Operand& op, cli::Tokens tokens) {
   // Handle indirect operand surronded by parentheses
   bool is_indirect = false;
   if (tokens.peek_char() == '(') {
@@ -20,7 +20,7 @@ bool parse_operand(Operand& op, core::Tokens tokens) {
     tokens = tokens.split_at(')');
 
     // Split optional displacement following +/-
-    core::Tokens disp_tok = tokens;
+    cli::Tokens disp_tok = tokens;
     bool is_minus = false;
     disp_tok.split_at('+');
     if (!disp_tok.has_next()) {
@@ -60,7 +60,7 @@ bool parse_operand(Operand& op, core::Tokens tokens) {
 }
 
 template <typename API>
-bool parse_instruction(Instruction& inst, core::Tokens args) {
+bool parse_instruction(Instruction& inst, cli::Tokens args) {
   const char* mnemonic = args.next();
   inst.mnemonic = pgm_bsearch(MNE_STR, mnemonic);
   uMON_FMT_ERROR(API, inst.mnemonic == MNE_INVALID, "op", mnemonic, return false);
@@ -77,7 +77,7 @@ bool parse_instruction(Instruction& inst, core::Tokens args) {
 }
 
 template <typename API>
-void cmd_asm(core::Args args) {
+void cmd_asm(cli::Args args) {
   uMON_EXPECT_ADDR(API, uint16_t, start, args, return);
 
   // Parse and assemble instruction
@@ -91,7 +91,7 @@ void cmd_asm(core::Args args) {
 }
 
 template <typename API, uint8_t MAX_ROWS = 24>
-void cmd_dasm(core::Args args) {
+void cmd_dasm(cli::Args args) {
   // Default size to one instruction if not provided
   uMON_EXPECT_ADDR(API, uint16_t, start, args, return);
   uMON_OPTION_UINT(API, uint16_t, size, 1, args, return);

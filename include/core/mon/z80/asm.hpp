@@ -4,7 +4,6 @@
 
 #include "common.hpp"
 #include "core/mon/format.hpp"
-#include "core/cli.hpp"
 
 #include <stdint.h>
 

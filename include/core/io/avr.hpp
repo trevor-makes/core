@@ -101,9 +101,10 @@
 // Define Reg[DDR#X, PORT#X, PIN#X], Port#X
 #define CORE_PORT(X) \
   CORE_REG(DDR##X) CORE_REG(PORT##X) CORE_REG(PIN##X) \
-  using Port##X = core::Port<RegDDR##X, RegPORT##X, RegPIN##X>;
+  using Port##X = core::io::Port<RegDDR##X, RegPORT##X, RegPIN##X>;
 
 namespace core {
+namespace io {
 
 template <typename DDR, typename PORT, typename PIN>
 struct Port : PORT::Output, PIN::Input {
@@ -154,4 +155,5 @@ struct Port : PORT::Output, PIN::Input {
   }
 };
 
+} // namespace io
 } // namespace core

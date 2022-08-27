@@ -2,10 +2,10 @@
 
 #include "core/cli.hpp"
 
-using core::CLI;
-using core::Command;
-using core::StreamEx;
-using core::Tokens;
+using core::cli::CLI;
+using core::cli::Command;
+using core::serial::StreamEx;
+using core::cli::Tokens;
 
 StreamEx serial_ex(Serial);
 CLI<> serial_cli(serial_ex);

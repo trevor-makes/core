@@ -6,17 +6,22 @@
 #include <stdint.h>
 
 namespace core {
+namespace io {
 
 #if defined(ARDUINO_AVR_MICRO)
 
+CORE_PORT(C)
+CORE_PORT(D)
+CORE_PORT(E)
+
 // PORTC [* C - - - - - -]
-using Clock = uIO::PortC::Bit<6>;
+using Clock = PortC::Bit<6>;
 
 // PORTD [CS WE - R A3 A2 A1 A0]
-using Reset = uIO::PortD::Bit<4>;
+using Reset = PortD::Bit<4>;
 
 // PORTE [- H - - - * - -]
-using Halt = uIO::PortE::Bit<6>;
+using Halt = PortE::Bit<6>;
 
 inline void configure_clock() {
   Clock::config_output(); // DDRC |= bit(6); //< set PC6 (OC3A) as output
@@ -58,4 +63,5 @@ bool is_halted() {
 
 #endif
 
+} // namespace io
 } // namespace core

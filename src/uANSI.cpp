@@ -1,10 +1,11 @@
 // Copyright (c) 2021 Trevor Makes
 
-#include "core/ansi.hpp"
+#include "core/serial.hpp"
 
 #include <ctype.h>
 
 namespace core {
+namespace serial {
 
 int StreamEx::peek() {
   // Fill peek buffer if empty
@@ -249,4 +250,5 @@ void StreamEx::set_style(Style style) {
   stream_.write('m');
 }
 
+} // namespace serial
 } // namespace core

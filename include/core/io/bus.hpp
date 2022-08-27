@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 namespace core {
+namespace io {
 
 // Typical SRAM interface with active-low control lines
 template <typename CHIP_SELECT, typename OUTPUT_ENABLE, typename WRITE_ENABLE>
@@ -134,4 +135,5 @@ void enable_clock(bool enable);
 // Read the HALT signal from the Z80
 bool is_halted();
 
+} // namespace io
 } // namespace core

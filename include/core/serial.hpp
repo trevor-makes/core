@@ -11,9 +11,10 @@
 #include <stdint.h>
 
 namespace core {
+namespace serial {
 
 // Styles supported by `set_style`
-enum class Style {
+enum class Style : uint8_t {
   DEFAULT   = 0,
   BOLD      = 1,
   FAINT     = 2,
@@ -24,7 +25,7 @@ enum class Style {
 };
 
 // Colors supported by `set_foreground` and `set_background`
-enum class Color {
+enum class Color : uint8_t {
   BLACK   = 0,
   RED     = 1,
   GREEN   = 2,
@@ -49,14 +50,12 @@ class StreamEx : public Stream {
 
 public:
   // Extended key codes returned by `read`
-  enum Key {
-    KEY_UP    = 0x100,
-    KEY_DOWN  = 0x101,
-    KEY_RIGHT = 0x102,
-    KEY_LEFT  = 0x103,
-    KEY_END   = 0x104,
-    KEY_HOME  = 0x105,
-  };
+  static constexpr int KEY_UP    = 0x100;
+  static constexpr int KEY_DOWN  = 0x101;
+  static constexpr int KEY_RIGHT = 0x102;
+  static constexpr int KEY_LEFT  = 0x103;
+  static constexpr int KEY_END   = 0x104;
+  static constexpr int KEY_HOME  = 0x105;
 
   StreamEx(Stream& stream): stream_{stream} {}
 
@@ -115,4 +114,5 @@ public:
   }
 };
 
+} // namespace serial
 } // namespace core

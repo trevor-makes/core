@@ -2,11 +2,12 @@
 
 #pragma once
 
-#include "core/ansi.hpp"
+#include "core/serial.hpp"
 
 #include <stdint.h>
 
 namespace core {
+namespace cli {
 
 using CommandFn = void (*)(class Args);
 using IdleFn = void (*)();
@@ -140,7 +141,7 @@ public:
 };
 
 // Read from stream into cursor without blocking
-bool try_read(StreamEx& stream, Cursor& cursor, History& history);
+bool try_read(serial::StreamEx& stream, Cursor& cursor, History& history);
 
 template <uint8_t SIZE>
 class CursorOwner : public Cursor {
@@ -158,13 +159,13 @@ public:
 
 template <uint8_t BUF_SIZE = 80, uint8_t HIST_SIZE = 80, uint8_t PRM_SIZE = 20>
 class CLI {
-  StreamEx& stream_;
+  serial::StreamEx& stream_;
   CursorOwner<BUF_SIZE> cursor_;
   HistoryOwner<HIST_SIZE> history_;
   CursorOwner<PRM_SIZE> prompt_;
 
 public:
-  CLI(StreamEx& stream): stream_{stream} {}
+  CLI(serial::StreamEx& stream): stream_{stream} {}
 
   void prompt(const char* str) { prompt_.try_insert(str); }
   void prompt(char c) { prompt_.try_insert(c); }
@@ -222,4 +223,5 @@ public:
   }
 };
 
+} // namespace cli
 } // namespace core
