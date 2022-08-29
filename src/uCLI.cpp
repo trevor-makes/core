@@ -261,11 +261,10 @@ Tokens Tokens::split_at(char separator) {
 
 const char* Tokens::next() {
   Tokens token;
-  trim_left(' ');
-  char c = peek_char();
-  if (c == '\"' || c == '\'') {
-    ++next_; // skip past open quote
-    token = split_at(c);
+  if (is_string()) {
+    // Capture token between matching quotes
+    char quote = *next_++;
+    token = split_at(quote);
   } else {
     token = split_at(' ');
   }

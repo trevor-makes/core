@@ -30,9 +30,9 @@ public:
   Tokens(): next_{const_cast<char*>("")} {}
 
   const char* next();
-  char peek_char() const { return *next_; }
-  bool has_next() const { return *next_ != '\0'; }
-  bool is_string() const { return *next_ == '\"' || *next_ == '\''; }
+  char peek_char() { trim_left(' '); return *next_; }
+  bool has_next() { return peek_char() != '\0'; }
+  bool is_string() { char c = peek_char(); return c == '\"' || c == '\''; }
 
   template <uint8_t N>
   uint8_t get(const char* (&argv)[N], bool are_strings[] = nullptr) {
