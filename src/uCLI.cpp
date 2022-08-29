@@ -260,16 +260,16 @@ Tokens Tokens::split_at(char separator) {
 }
 
 const char* Tokens::next() {
-  Tokens prev;
+  Tokens token;
+  trim_left(' ');
   char c = peek_char();
   if (c == '\"' || c == '\'') {
     ++next_; // skip past open quote
-    prev = split_at(c);
+    token = split_at(c);
   } else {
-    trim_left(' ');
-    prev = split_at(' ');
+    token = split_at(' ');
   }
-  return prev.next_;
+  return token.next_;
 }
 
 } // namespace cli
