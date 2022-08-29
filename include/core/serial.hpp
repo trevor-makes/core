@@ -11,6 +11,7 @@
 #include <stdint.h>
 
 // Arduino pollutes all namespaces by defining DEFAULT in the preprocessor
+// TODO put related hacks (like min/max in util.hpp) into a sanitized Arduino header
 #ifdef DEFAULT
 constexpr uint8_t DEFAULT_BUT_DONT_POLLUTE = DEFAULT;
 #undef DEFAULT

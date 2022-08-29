@@ -266,6 +266,7 @@ const char* Tokens::next() {
     ++next_; // skip past open quote
     prev = split_at(c);
   } else {
+    trim_left(' ');
     prev = split_at(' ');
   }
   return prev.next_;
