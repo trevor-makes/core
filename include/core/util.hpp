@@ -26,6 +26,12 @@ T max(T a, T b) {
   return a > b ? a : b;
 }
 
+// Defined in <algorithm> for C++17
+template <typename T>
+T clamp(T val, T low, T high) {
+  return (val > high) ? high : ((val < low) ? low : val);
+}
+
 // Convert type <volatile T&> to T
 template <typename>
 struct remove_volatile_reference;
