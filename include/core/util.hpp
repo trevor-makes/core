@@ -166,6 +166,8 @@ static_assert(countl_zero(uint32_t(0x80000000)) == 0, "");
 static_assert(countl_zero(uint32_t(0xF0F0F0F0)) == 0, "");
 static_assert(countl_zero(uint32_t(0x0F0F0F0F)) == 4, "");
 
+uint8_t reverse_bits(uint8_t b);
+
 // Fill array with function arguments
 template <uint8_t I = 0, typename T1, typename T2, uint8_t N>
 void copy_from_args(T1 (&into)[N], const T2 from) {
