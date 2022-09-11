@@ -178,13 +178,13 @@ public:
     count_ = 1;
   }
 
-  void insert(TYPE pin, uint8_t value) {
+  void insert(TYPE pin, uint8_t value, uint8_t range) {
     // Store the initial state of all pins in event 0
     if (value > 0) {
       events_[0].pins |= pin;
     }
     // 0% and 100% duty cycle channels never change state, so they don't need events
-    if (value == 0 || value == 255) {
+    if (value == 0 || value >= range) {
       return;
     }
     // Find index at which to insert, sorted by ascending value
@@ -211,7 +211,7 @@ public:
   }
 
   // Pre-compute timer delta and accumulate toggled pins
-  void compile() {
+  void compile(uint8_t range) {
     TYPE output = events_[0].pins;
     uint8_t elapsed = 0;
     for (uint8_t index = 1; index < count_; ++index) {
@@ -221,13 +221,13 @@ public:
       output &= ~event.pins;
       event.pins = output;
       // Compute timer delta between events
-      // NOTE subtract 1 because the timer will delay at least 1 cycle
+      // NOTE delta N delays by N+1 cycles, so subtract 1 from the target number
       prev.delta = event.delta - elapsed - 1;
       elapsed = event.delta;
     }
-    // Set final delta for 255 cycles from first event
-    // NOTE setting timer to 254 delays for 255 cycles
-    events_[count_ - 1].delta = 254 - elapsed;
+    // Set final delta for range cycles from first event
+    // NOTE delta N delays by N+1 cycles, so subtract 1 from the target number
+    events_[count_ - 1].delta = range - elapsed - 1;
   }
 
   class iterator {
@@ -275,6 +275,7 @@ class Controller {
   DoubleBuffer<EVENTS> events_;
   typename EVENTS::iterator isr_iter_;
   uint16_t period_ = 0;
+  uint8_t range_ = 255;
   volatile uint16_t counter_ = 0;
   volatile bool dirty_ = false;
 
@@ -301,19 +302,20 @@ public:
     return keyframes_[zone].get(index, time, args...);
   }
 
-  constexpr static uint8_t PWM_VERSION = '1';
-  constexpr static uint16_t SAVE_SIZE = 6 + sizeof(keyframes_);
+  constexpr static uint8_t PWM_VERSION = '2';
+  constexpr static uint16_t SAVE_SIZE = 7 + sizeof(keyframes_);
 
   template <typename STORE>
-  bool save(uint8_t index) {
+  bool save(uint8_t index) const {
     if ((index + 1) * SAVE_SIZE > STORE::get_size()) return false;
     uint16_t base = index * SAVE_SIZE;
     STORE::save_byte(base, PWM_VERSION);
     STORE::save_byte(base + 1, N_ZONES);
     STORE::save_byte(base + 2, N_PER_ZONE);
     STORE::save_byte(base + 3, N_KEYFRAMES);
-    STORE::save(base + 4, period_);
-    STORE::save(base + 6, keyframes_);
+    STORE::save(base + 4, range_);
+    STORE::save(base + 5, period_);
+    STORE::save(base + 7, keyframes_);
     return true;
   }
 
@@ -325,9 +327,18 @@ public:
     if (STORE::load_byte(base + 1) != N_ZONES) return false;
     if (STORE::load_byte(base + 2) != N_PER_ZONE) return false;
     if (STORE::load_byte(base + 3) != N_KEYFRAMES) return false;
-    STORE::load(base + 4, period_);
-    STORE::load(base + 6, keyframes_);
+    STORE::load(base + 4, range_);
+    STORE::load(base + 5, period_);
+    STORE::load(base + 7, keyframes_);
     return true;
+  }
+
+  void set_range(uint8_t range) {
+    range_ = range;
+  }
+
+  uint8_t get_range() const {
+    return range_;
   }
 
   void set_period(uint16_t period) {
@@ -337,7 +348,7 @@ public:
     period_ = period;
   }
 
-  uint16_t get_period() {
+  uint16_t get_period() const {
     return period_;
   }
 
@@ -351,7 +362,7 @@ public:
     }
   }
 
-  bool can_update() {
+  bool can_update() const {
     return dirty_ == false;
   }
 
@@ -369,10 +380,10 @@ public:
         uint8_t values[N_PER_ZONE];
         keyframes_[zone].evaluate(counter, period_, values);
         for (uint8_t i = 0; i < N_PER_ZONE; ++i) {
-          events.insert(pins_[zone * N_PER_ZONE + i], values[i]);
+          events.insert(pins_[zone * N_PER_ZONE + i], values[i], range_);
         }
       }
-      events.compile();
+      events.compile(range_);
       // Swap event buffers when the PWM cycle resets
       dirty_ = true;
     }
