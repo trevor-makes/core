@@ -2,8 +2,8 @@
 
 #pragma once
 
-// TODO it would be nice to abort without an error if Arduino.h doesn't exist or if we're not using that framework
-// Maybe there's a macro or environment variable we can check for that
+// TODO maybe there are cases where we don't want to include Arduino.h even if it exists in path
+#if __has_include("Arduino.h")
 
 // Try to preemptively exclude "binary.h"
 #ifndef Binary_h
@@ -127,4 +127,6 @@ template <typename T>
 constexpr auto bit(T b) -> decltype(1UL << b) {
   return 1UL << b;
 }
+#endif
+
 #endif
