@@ -2,33 +2,28 @@
 
 #pragma once
 
+// Sanitize Arduino preprocessor macros
+#include "core/arduino.hpp"
+
 #include <stdint.h>
 
 namespace util {
 
-// min is defined as a macro in Arduino.h, so undef just in case
-#ifdef min
-#undef min
-#endif
-
-template <typename T>
-T min(T a, T b) {
+// C++11 <algorithm>, missing on AVR
+template <typename A, typename B>
+constexpr auto min(A a, B b) -> decltype(a + b) {
   return a < b ? a : b;
 }
 
-// max is defined as a macro in Arduino.h, so undef just in case
-#ifdef max
-#undef max
-#endif
-
-template <typename T>
-T max(T a, T b) {
+// C++11 <algorithm>, missing on AVR
+template <typename A, typename B>
+constexpr auto max(A a, B b) -> decltype(a + b) {
   return a > b ? a : b;
 }
 
-// Defined in <algorithm> for C++17
-template <typename T>
-T clamp(T val, T low, T high) {
+// C++17 <algorithm>, missing on AVR
+template <typename A, typename B, typename C>
+constexpr auto clamp(A val, B low, C high) -> decltype(val + low + high) {
   return (val > high) ? high : ((val < low) ? low : val);
 }
 

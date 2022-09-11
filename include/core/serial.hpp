@@ -5,19 +5,10 @@
 #ifdef ENV_NATIVE
 #include "FakeStream.hpp"
 #else
-#include <Arduino.h>
+#include "core/arduino.hpp"
 #endif
 
 #include <stdint.h>
-
-// Arduino pollutes all namespaces by defining DEFAULT in the preprocessor
-// TODO put related hacks (like min/max in util.hpp) into a sanitized Arduino header
-#ifdef DEFAULT
-constexpr uint8_t DEFAULT_BUT_DONT_POLLUTE = DEFAULT;
-#undef DEFAULT
-// Redefine DEFAULT as a constant in the default namespace only
-constexpr uint8_t DEFAULT = DEFAULT_BUT_DONT_POLLUTE;
-#endif
 
 namespace core {
 namespace serial {
