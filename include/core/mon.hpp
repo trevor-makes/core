@@ -95,7 +95,7 @@ void impl_memmove(uint16_t start, uint16_t end, uint16_t dest) {
 
 // Print memory range in IHX format
 template <typename API, uint8_t REC_SIZE = 32>
-void impl_save(uint16_t start, uint16_t size) {
+void impl_export(uint16_t start, uint16_t size) {
   while (size > 0) {
     uint8_t rec_size = size > REC_SIZE ? REC_SIZE : size;
     size -= rec_size;
@@ -135,7 +135,7 @@ bool read_ihx_data(uint8_t rec_size, uint16_t address, uint8_t checksum) {
 
 // Read serial data from IHX format into memory
 template <typename API>
-void cmd_load(cli::Args) {
+void cmd_import(cli::Args) {
   for (;;) {
     // Discard whitespace while looking for start of record (:)
     char c;
@@ -201,10 +201,10 @@ void cmd_move(cli::Args args) {
 }
 
 template <typename API, uint8_t REC_SIZE = 32>
-void cmd_save(cli::Args args) {
+void cmd_export(cli::Args args) {
   uMON_EXPECT_ADDR(API, uint16_t, start, args, return);
   uMON_EXPECT_UINT(API, uint16_t, size, args, return);
-  impl_save<API, REC_SIZE>(start, size);
+  impl_export<API, REC_SIZE>(start, size);
 }
 
 template <typename API>
