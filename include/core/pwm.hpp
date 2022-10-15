@@ -328,7 +328,9 @@ public:
     if (STORE::load_byte(base + 2) != N_PER_ZONE) return false;
     if (STORE::load_byte(base + 3) != N_KEYFRAMES) return false;
     STORE::load(base + 4, range_);
-    STORE::load(base + 5, period_);
+    uint16_t period;
+    STORE::load(base + 5, period);
+    set_period(period);
     STORE::load(base + 7, keyframes_);
     return true;
   }
