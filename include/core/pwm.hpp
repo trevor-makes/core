@@ -392,6 +392,11 @@ public:
   }
 
   void isr() {
+    // Handle the next event in the queue
+    if (auto next = isr_iter_.next()) {
+      TIMER::set_delay(next->delta);
+      GPIO::write(next->pins);
+    }
     // When the end of the event queue is reached...
     if (!isr_iter_.has_next()) {
       // Increment counter up to period
@@ -407,15 +412,6 @@ public:
       }
       // Reset iterator to start of event queue
       isr_iter_ = events_.front().iter();
-    }
-    // Handle the next event in the queue
-    if (auto next = isr_iter_.next()) {
-      // Update timer and GPIO registers according to event
-      TIMER::set_delay(next->delta);
-      GPIO::write(next->pins);
-    } else {
-      // If iterator is empty just clear GPIO pins
-      GPIO::clear();
     }
   }
 };
