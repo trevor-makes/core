@@ -168,7 +168,7 @@ class Events {
     uint8_t delta;
   };
 
-  Event events_[N_EVENTS];
+  Event events_[N_EVENTS + 1];
   uint8_t count_ = 0;
 
 public:
@@ -264,11 +264,10 @@ public:
 
 template <typename GPIO, typename TIMER, uint8_t N_ZONES, uint8_t N_PER_ZONE, uint8_t N_KEYFRAMES>
 class Controller {
-  static constexpr auto N_CHANNELS = N_ZONES * N_PER_ZONE;
-  static constexpr auto N_MAX_EVENTS = N_CHANNELS + 1;
+  static constexpr uint8_t N_CHANNELS = N_ZONES * N_PER_ZONE;
 
   using TYPE = typename GPIO::TYPE;
-  using EVENTS = Events<TYPE, N_MAX_EVENTS>;
+  using EVENTS = Events<TYPE, N_CHANNELS>;
 
   TYPE pins_[N_CHANNELS];
   Keyframes<N_PER_ZONE, N_KEYFRAMES> keyframes_[N_ZONES];
