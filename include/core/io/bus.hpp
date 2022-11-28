@@ -22,9 +22,6 @@ struct Control {
 
   // Configure ports to float for external control
   static inline void config_float() {
-    CHIP_SELECT::set();
-    OUTPUT_ENABLE::set();
-    WRITE_ENABLE::set();
     CHIP_SELECT::config_input_pullups();
     OUTPUT_ENABLE::config_input_pullups();
     WRITE_ENABLE::config_input_pullups();
@@ -96,44 +93,7 @@ struct Bus {
     CONTROL::end_read();
     return data;
   }
-
-  // TODO remove the string methods?
-  static void write_string(ADDRESS_TYPE addr, const char* string) {
-    for (;;) {
-      const uint8_t data = *string++;
-      write_byte(addr++, data);
-      if (data == 0)
-        break;
-    }
-  }
-
-  static void read_string(ADDRESS_TYPE addr, char* string, uint8_t max_len) {
-    for (uint8_t i = 0; i < max_len; ++i) {
-      const uint8_t data = read_byte(addr + i);
-      string[i] = data;
-      if (data == 0)
-        break;
-    }
-  }
-
-  // Read bytes to buffer until null terminator or end of buffer
-  template <uint8_t L>
-  static void read_string(ADDRESS_TYPE addr, char (&buffer)[L]) {
-    read_string(addr, buffer, L);
-  }
 };
-
-// Perform initial configuration
-void setup();
-
-// Holds the Z80 in reset if true, otherwise resumes
-void force_reset(bool enable);
-
-// Resumes the clock output if true, otherwise pauses
-void enable_clock(bool enable);
-
-// Read the HALT signal from the Z80
-bool is_halted();
 
 } // namespace io
 } // namespace core
