@@ -8,47 +8,40 @@ namespace core {
 namespace io {
 
 // Typical SRAM interface with active-low control lines
-template <typename CHIP_SELECT, typename OUTPUT_ENABLE, typename WRITE_ENABLE>
+template <typename OUTPUT_ENABLE, typename WRITE_ENABLE>
 struct Control {
   // Configure ports to drive control lines
   static inline void config_active() {
-    CHIP_SELECT::set();
     OUTPUT_ENABLE::set();
     WRITE_ENABLE::set();
-    CHIP_SELECT::config_output();
     OUTPUT_ENABLE::config_output();
     WRITE_ENABLE::config_output();
   }
 
   // Configure ports to float for external control
   static inline void config_float() {
-    CHIP_SELECT::config_input_pullups();
     OUTPUT_ENABLE::config_input_pullups();
     WRITE_ENABLE::config_input_pullups();
   }
 
   // Set control lines for start of write sequence
   static inline void begin_write() {
-    CHIP_SELECT::clear();
     WRITE_ENABLE::clear();
   }
 
   // Set control lines for end of write sequence
   static inline void end_write() {
     WRITE_ENABLE::set();
-    CHIP_SELECT::set();
   }
 
   // Set control lines for start of read sequence
   static inline void begin_read() {
-    CHIP_SELECT::clear();
     OUTPUT_ENABLE::clear();
   }
 
   // Set control lines for end of read sequence
   static inline void end_read() {
     OUTPUT_ENABLE::set();
-    CHIP_SELECT::set();
   }
 };
 
