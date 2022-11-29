@@ -143,6 +143,19 @@ struct Overlay {
     Port1::config_input_pullups();
     Port2::config_input_pullups();
   }
+
+  static inline Config<TYPE> save_config() {
+    auto config1 = Port1::save_config();
+    auto config2 = Port2::save_config();
+    config1.port |= config2.port;
+    config1.ddr |= config2.ddr;
+    return config1;
+  }
+
+  static inline void restore_config(Config<TYPE> config) {
+    Port1::restore_config(config);
+    Port2::restore_config(config);
+  }
 };
 
 template <typename ...>
@@ -244,6 +257,28 @@ struct WordExtend<PortMSB, PortLSB> {
   static inline void config_input_pullups() {
     PortMSB::config_input_pullups();
     PortLSB::config_input_pullups();
+  }
+
+  static inline Config<TYPE> save_config() {
+    auto configLSB = PortLSB::save_config();
+    auto configMSB = PortMSB::save_config();
+
+    Config<TYPE> config;
+    config.port = TYPE(configLSB.port) | (TYPE(configMSB.port) << SHIFT);
+    config.ddr = TYPE(configLSB.ddr) | (TYPE(configMSB.ddr) << SHIFT);
+    return config;
+  }
+
+  static inline void restore_config(Config<TYPE> config) {
+    Config<typename PortMSB::TYPE> configMSB;
+    configMSB.port = config.port >> SHIFT;
+    configMSB.ddr = config.ddr >> SHIFT;
+    PortMSB::restore_config(configMSB);
+
+    Config<typename PortLSB::TYPE> configLSB;
+    configLSB.port = config.port;
+    configLSB.ddr = config.ddr;
+    PortLSB::restore_config(configLSB);
   }
 };
 
