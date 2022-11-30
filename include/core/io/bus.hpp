@@ -9,9 +9,12 @@ namespace io {
 
 template <typename PIN>
 struct ActiveLow {
-  static inline void config_output() {
-    PIN::config_output();
+  static inline void config_active() {
     disable();
+    PIN::config_output();
+  }
+  static inline void config_float() {
+    PIN::config_input();
   }
   static inline void enable() {
     PIN::clear();
@@ -23,9 +26,12 @@ struct ActiveLow {
 
 template <typename PIN>
 struct ActiveHigh {
-  static inline void config_output() {
-    PIN::config_output();
+  static inline void config_active() {
     disable();
+    PIN::config_output();
+  }
+  static inline void config_float() {
+    PIN::config_input();
   }
   static inline void enable() {
     PIN::set();
@@ -40,36 +46,34 @@ template <typename OUTPUT_ENABLE, typename WRITE_ENABLE>
 struct Control {
   // Configure ports to drive control lines
   static inline void config_active() {
-    OUTPUT_ENABLE::set();
-    WRITE_ENABLE::set();
-    OUTPUT_ENABLE::config_output();
-    WRITE_ENABLE::config_output();
+    OUTPUT_ENABLE::config_active();
+    WRITE_ENABLE::config_active();
   }
 
   // Configure ports to float for external control
   static inline void config_float() {
-    OUTPUT_ENABLE::config_input_pullups();
-    WRITE_ENABLE::config_input_pullups();
+    OUTPUT_ENABLE::config_float();
+    WRITE_ENABLE::config_float();
   }
 
   // Set control lines for start of write sequence
   static inline void begin_write() {
-    WRITE_ENABLE::clear();
+    WRITE_ENABLE::enable();
   }
 
   // Set control lines for end of write sequence
   static inline void end_write() {
-    WRITE_ENABLE::set();
+    WRITE_ENABLE::disable();
   }
 
   // Set control lines for start of read sequence
   static inline void begin_read() {
-    OUTPUT_ENABLE::clear();
+    OUTPUT_ENABLE::enable();
   }
 
   // Set control lines for end of read sequence
   static inline void end_read() {
-    OUTPUT_ENABLE::set();
+    OUTPUT_ENABLE::disable();
   }
 };
 
@@ -79,12 +83,12 @@ struct Latch {
   static inline void config_output() {
     // TODO enable OUTPUT_ENABLE
     DATA::config_output();
-    LATCH_ENABLE::config_output();
+    LATCH_ENABLE::config_active();
   }
   static inline void config_input() {
     // TODO disable OUTPUT_ENABLE
     // NOTE don't need to config DATA
-    // TODO LATCH_ENABLE::config_float_disable();
+    LATCH_ENABLE::config_float();
   }
   static inline void write(TYPE data) {
     DATA::write(data);
