@@ -159,20 +159,6 @@ struct Port : PORT::Output, PIN::Input {
     PORT::set(); //< Set bits in PORT to enable pullups
     DDR::clear(); //< Clear bits in DDR to select read mode
   }
-
-  // Save port configuration to be restored by restore_config
-  static inline Config<TYPE> save_config() {
-    Config<TYPE> config;
-    config.port = PORT::read();
-    config.ddr = DDR::read();
-    return config;
-  }
-
-  // Restore port configuration saved by save_config
-  static inline void restore_config(Config<TYPE> config) {
-    DDR::write(config.ddr);
-    PORT::write(config.port);
-  }
 };
 
 } // namespace io

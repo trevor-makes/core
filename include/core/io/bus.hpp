@@ -80,7 +80,10 @@ struct Bus {
   }
 
   static DATA_TYPE read_byte(ADDRESS_TYPE addr) {
+    // Re-config direction each read in case ADDRESS is latched from DATA
+    ADDRESS::config_output();
     ADDRESS::write(addr);
+    DATA::config_input();
     CONTROL::begin_read();
     const DATA_TYPE data = DATA::read();
     CONTROL::end_read();
