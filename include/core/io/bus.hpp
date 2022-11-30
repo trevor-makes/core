@@ -7,6 +7,34 @@
 namespace core {
 namespace io {
 
+template <typename PIN>
+struct ActiveLow {
+  static inline void config_output() {
+    PIN::config_output();
+    disable();
+  }
+  static inline void enable() {
+    PIN::clear();
+  }
+  static inline void disable() {
+    PIN::set();
+  }
+};
+
+template <typename PIN>
+struct ActiveHigh {
+  static inline void config_output() {
+    PIN::config_output();
+    disable();
+  }
+  static inline void enable() {
+    PIN::set();
+  }
+  static inline void disable() {
+    PIN::clear();
+  }
+};
+
 // Typical SRAM interface with active-low control lines
 template <typename OUTPUT_ENABLE, typename WRITE_ENABLE>
 struct Control {
@@ -42,6 +70,26 @@ struct Control {
   // Set control lines for end of read sequence
   static inline void end_read() {
     OUTPUT_ENABLE::set();
+  }
+};
+
+template <typename DATA, typename LATCH_ENABLE/*, typename OUTPUT_ENABLE*/>
+struct Latch {
+  using TYPE = typename DATA::TYPE;
+  static inline void config_output() {
+    // TODO enable OUTPUT_ENABLE
+    DATA::config_output();
+    LATCH_ENABLE::config_output();
+  }
+  static inline void config_input() {
+    // TODO disable OUTPUT_ENABLE
+    // NOTE don't need to config DATA
+    // TODO LATCH_ENABLE::config_float_disable();
+  }
+  static inline void write(TYPE data) {
+    DATA::write(data);
+    LATCH_ENABLE::enable();
+    LATCH_ENABLE::disable();
   }
 };
 
