@@ -148,6 +148,9 @@ uint8_t pgm_bsearch(const char* const (&table)[N], const char* str) {
   return res == nullptr ? N : (res - (char*)table) / sizeof(table[0]);
 }
 
+} // namespace mon
+} // namespace core
+
 #define uMON_FMT_ERROR(API, IS_ERR, LABEL, STRING, FAIL) \
   if (IS_ERR) { \
     const char* str = STRING; \
@@ -166,7 +169,7 @@ uint8_t pgm_bsearch(const char* const (&table)[N], const char* str) {
   { \
     const char* str = ARGS.next(); \
     if ( API::get_labels().get_addr(str, NAME)) {} \
-    else if (parse_unsigned(NAME, str)) {} \
+    else if (core::mon::parse_unsigned(NAME, str)) {} \
     else { uMON_FMT_ERROR(API, true, #NAME, str, FAIL) } \
   }
 
@@ -174,7 +177,7 @@ uint8_t pgm_bsearch(const char* const (&table)[N], const char* str) {
   TYPE NAME; \
   { \
     const char* str = ARGS.next(); \
-    const bool is_err = !parse_unsigned(NAME, str); \
+    const bool is_err = !core::mon::parse_unsigned(NAME, str); \
     uMON_FMT_ERROR(API, is_err, #NAME, str, FAIL) \
   }
 
@@ -182,17 +185,14 @@ uint8_t pgm_bsearch(const char* const (&table)[N], const char* str) {
   TYPE NAME = DEFAULT; \
   if (ARGS.has_next()) { \
     const char* str = ARGS.next(); \
-    const bool is_err = !parse_unsigned(NAME, str); \
+    const bool is_err = !core::mon::parse_unsigned(NAME, str); \
     uMON_FMT_ERROR(API, is_err, #NAME, str, FAIL); \
   }
 
 #define uMON_INPUT_HEX8(API, NAME, FAIL) \
   uint8_t NAME; \
-  if (!input_hex<API, 2>(NAME)) FAIL;
+  if (!core::mon::input_hex<API, 2>(NAME)) FAIL;
 
 #define uMON_INPUT_HEX16(API, NAME, FAIL) \
   uint16_t NAME; \
-  if (!input_hex<API, 4>(NAME)) FAIL;
-
-} // namespace mon
-} // namespace core
+  if (!core::mon::input_hex<API, 4>(NAME)) FAIL;
