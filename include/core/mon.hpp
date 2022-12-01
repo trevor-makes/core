@@ -124,12 +124,12 @@ template <typename API>
 bool read_ihx_data(uint8_t rec_size, uint16_t address, uint8_t checksum) {
   // Read record data
   for (uint8_t i = 0; i < rec_size; ++i) {
-    uMON_INPUT_HEX8(API, data, return false);
+    CORE_INPUT_HEX8(API, data, return false);
     API::write_byte(address + i, data);
     checksum += data;
   }
   // Validate checksum
-  uMON_INPUT_HEX8(API, data, return false);
+  CORE_INPUT_HEX8(API, data, return false);
   return uint8_t(checksum + data) == 0;
 }
 
@@ -142,9 +142,9 @@ void cmd_import(cli::Args) {
     do { c = API::input_char(); } while (isspace(c));
     if (c != ':') break;
     // Parse record header and data
-    uMON_INPUT_HEX8(API, rec_size, break);
-    uMON_INPUT_HEX16(API, address, break);
-    uMON_INPUT_HEX8(API, rec_type, break);
+    CORE_INPUT_HEX8(API, rec_size, break);
+    CORE_INPUT_HEX16(API, address, break);
+    CORE_INPUT_HEX8(API, rec_type, break);
     uint8_t checksum = rec_size + (address >> 8) + (address & 0xFF) + rec_type;
     if (!read_ihx_data<API>(rec_size, address, checksum)) break;
     // Exit if record type is not data (00)
@@ -160,8 +160,8 @@ void cmd_import(cli::Args) {
 template <typename API, uint8_t COL_SIZE = 16, uint8_t MAX_ROWS = 24>
 void cmd_hex(cli::Args args) {
   // Default size to one row if not provided
-  uMON_EXPECT_ADDR(API, uint16_t, start, args, return);
-  uMON_OPTION_UINT(API, uint16_t, size, COL_SIZE, args, return);
+  CORE_EXPECT_ADDR(API, uint16_t, start, args, return);
+  CORE_OPTION_UINT(API, uint16_t, size, COL_SIZE, args, return);
   uint16_t end_incl = start + size - 1;
   uint16_t next = impl_hex<API, COL_SIZE, MAX_ROWS>(start, end_incl);
   uint16_t part = next - start;
@@ -172,12 +172,12 @@ void cmd_hex(cli::Args args) {
 
 template <typename API>
 void cmd_set(cli::Args args) {
-  uMON_EXPECT_ADDR(API, uint16_t, start, args, return);
+  CORE_EXPECT_ADDR(API, uint16_t, start, args, return);
   do {
     if (args.is_string()) {
       start = impl_strcpy<API>(start, args.next());
     } else {
-      uMON_EXPECT_UINT(API, uint8_t, data, args, return);
+      CORE_EXPECT_UINT(API, uint8_t, data, args, return);
       API::write_byte(start++, data);
     }
   } while (args.has_next());
@@ -186,24 +186,24 @@ void cmd_set(cli::Args args) {
 
 template <typename API>
 void cmd_fill(cli::Args args) {
-  uMON_EXPECT_ADDR(API, uint16_t, start, args, return);
-  uMON_EXPECT_UINT(API, uint16_t, size, args, return);
-  uMON_EXPECT_UINT(API, uint8_t, pattern, args, return);
+  CORE_EXPECT_ADDR(API, uint16_t, start, args, return);
+  CORE_EXPECT_UINT(API, uint16_t, size, args, return);
+  CORE_EXPECT_UINT(API, uint8_t, pattern, args, return);
   impl_memset<API>(start, start + size - 1, pattern);
 }
 
 template <typename API>
 void cmd_move(cli::Args args) {
-  uMON_EXPECT_ADDR(API, uint16_t, start, args, return);
-  uMON_EXPECT_UINT(API, uint16_t, size, args, return);
-  uMON_EXPECT_ADDR(API, uint16_t, dest, args, return);
+  CORE_EXPECT_ADDR(API, uint16_t, start, args, return);
+  CORE_EXPECT_UINT(API, uint16_t, size, args, return);
+  CORE_EXPECT_ADDR(API, uint16_t, dest, args, return);
   impl_memmove<API>(start, start + size - 1, dest);
 }
 
 template <typename API, uint8_t REC_SIZE = 32>
 void cmd_export(cli::Args args) {
-  uMON_EXPECT_ADDR(API, uint16_t, start, args, return);
-  uMON_EXPECT_UINT(API, uint16_t, size, args, return);
+  CORE_EXPECT_ADDR(API, uint16_t, start, args, return);
+  CORE_EXPECT_UINT(API, uint16_t, size, args, return);
   impl_export<API, REC_SIZE>(start, size);
 }
 
@@ -214,7 +214,7 @@ void cmd_label(cli::Args args) {
     const char* name = args.next();
     if (args.has_next()) {
       // Set label to integer argument
-      uMON_EXPECT_UINT(API, uint16_t, addr, args, return);
+      CORE_EXPECT_UINT(API, uint16_t, addr, args, return);
       if (labels.set_label(name, addr) == false) {
         API::print_string("full");
         API::newline();
@@ -222,7 +222,7 @@ void cmd_label(cli::Args args) {
     } else {
       // Remove label
       bool fail = !labels.remove_label(name);
-      uMON_FMT_ERROR(API, fail, "name", name, return);
+      CORE_FMT_ERROR(API, fail, "name", name, return);
     }
   } else {
     // Print list of all labels

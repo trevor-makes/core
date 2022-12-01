@@ -30,7 +30,7 @@ bool parse_operand(Operand& op, cli::Tokens tokens) {
     }
 
     // Parse displacement and apply sign
-    uMON_OPTION_UINT(API, uint16_t, disp, 0, disp_tok, return false);
+    CORE_OPTION_UINT(API, uint16_t, disp, 0, disp_tok, return false);
     op.value = is_minus ? -disp : disp;
   }
 
@@ -39,7 +39,7 @@ bool parse_operand(Operand& op, cli::Tokens tokens) {
   auto op_str = tokens.next();
   uint16_t value;
   if (is_string) {
-    uMON_FMT_ERROR(API, strlen(op_str) > 1, "chr", op_str, return false);
+    CORE_FMT_ERROR(API, strlen(op_str) > 1, "chr", op_str, return false);
     op.token = TOK_IMMEDIATE;
     op.value = op_str[0];
   } else if (API::get_labels().get_addr(op_str, value)) {
@@ -50,7 +50,7 @@ bool parse_operand(Operand& op, cli::Tokens tokens) {
     op.value = value;
   } else {
     op.token = pgm_bsearch(TOK_STR, op_str);
-    uMON_FMT_ERROR(API, op.token == TOK_INVALID, "arg", op_str, return false);
+    CORE_FMT_ERROR(API, op.token == TOK_INVALID, "arg", op_str, return false);
   }
 
   if (is_indirect) {
@@ -63,7 +63,7 @@ template <typename API>
 bool parse_instruction(Instruction& inst, cli::Tokens args) {
   const char* mnemonic = args.next();
   inst.mnemonic = pgm_bsearch(MNE_STR, mnemonic);
-  uMON_FMT_ERROR(API, inst.mnemonic == MNE_INVALID, "op", mnemonic, return false);
+  CORE_FMT_ERROR(API, inst.mnemonic == MNE_INVALID, "op", mnemonic, return false);
 
   // Parse operands
   for (Operand& op : inst.operands) {
@@ -72,13 +72,13 @@ bool parse_instruction(Instruction& inst, cli::Tokens args) {
   }
 
   // Error if unparsed operands remain
-  uMON_FMT_ERROR(API, args.has_next(), "rem", args.next(), return false);
+  CORE_FMT_ERROR(API, args.has_next(), "rem", args.next(), return false);
   return true;
 }
 
 template <typename API>
 void cmd_asm(cli::Args args) {
-  uMON_EXPECT_ADDR(API, uint16_t, start, args, return);
+  CORE_EXPECT_ADDR(API, uint16_t, start, args, return);
 
   // Parse and assemble instruction
   Instruction inst;
@@ -93,8 +93,8 @@ void cmd_asm(cli::Args args) {
 template <typename API, uint8_t MAX_ROWS = 24>
 void cmd_dasm(cli::Args args) {
   // Default size to one instruction if not provided
-  uMON_EXPECT_ADDR(API, uint16_t, start, args, return);
-  uMON_OPTION_UINT(API, uint16_t, size, 1, args, return);
+  CORE_EXPECT_ADDR(API, uint16_t, start, args, return);
+  CORE_OPTION_UINT(API, uint16_t, size, 1, args, return);
   uint16_t end_incl = start + size - 1;
   uint16_t next = dasm_range<API, MAX_ROWS>(start, end_incl);
   uint16_t part = next - start;
