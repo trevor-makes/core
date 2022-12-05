@@ -33,17 +33,23 @@ bool parse_unsigned(T& result, const char* str) {
 
 template <typename API, uint8_t N, typename T>
 bool input_hex(T& result) {
-  // Read input into buffer
-  char buf[N + 1];
-  for (uint8_t i = 0; i < N; ++i) {
-    buf[i] = API::input_char();
+  // NOTE previously used strtoul, but it was much slower
+  T value = 0;
+  for (uint8_t i = N; i > 0; --i) {
+    char c = API::input_char();
+    value <<= 4;
+    if (c >= '0' && c <= '9') {
+      value |= c - '0';
+    } else if (c >= 'a' && c <= 'f') {
+      value |= c - 'a' + 10;
+    } else if (c >= 'A' && c <= 'F') {
+      value |= c - 'A' + 10;
+    } else {
+      return false;
+    }
   }
-  buf[N] = '\0';
-  // Parse buffer as hex
-  char* end;
-  result = strtoul(buf, &end, 16);
-  // Return true if all characters were parsed
-  return end == &buf[N];
+  result = value;
+  return true;
 }
 
 // Print single hex digit (or garbage if n > 15)
