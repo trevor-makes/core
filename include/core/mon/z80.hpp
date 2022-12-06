@@ -83,7 +83,9 @@ void cmd_asm(cli::Args args) {
   // Parse and assemble instruction
   Instruction inst;
   if (parse_instruction<API>(inst, args)) {
+    API::BUS::config_write();
     uint8_t size = asm_instruction<API>(inst, start);
+    API::BUS::flush_write();
     if (size > 0) {
       set_prompt<API>(args.command(), start + size);
     }
@@ -95,6 +97,7 @@ void cmd_dasm(cli::Args args) {
   // Default size to one instruction if not provided
   CORE_EXPECT_ADDR(API, uint16_t, start, args, return);
   CORE_OPTION_UINT(API, uint16_t, size, 1, args, return);
+  API::BUS::config_read();
   uint16_t end_incl = start + size - 1;
   uint16_t next = dasm_range<API, MAX_ROWS>(start, end_incl);
   uint16_t part = next - start;

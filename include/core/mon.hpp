@@ -15,9 +15,14 @@ namespace mon {
 // Dump memory as hex/ascii from row to end, inclusive
 template <typename API, uint8_t COL_SIZE = 16, uint8_t MAX_ROWS = 24>
 uint16_t impl_hex(uint16_t row, uint16_t end) {
+  API::BUS::config_read();
+
   uint8_t row_data[COL_SIZE];
   for (uint8_t i = 0; i < MAX_ROWS; ++i) {
-    API::read_bytes(row, row_data);
+    // Read row into temp buffer
+    for (uint8_t j = 0; j < COL_SIZE; ++j) {
+      row_data[j] = API::BUS::read_byte(row + j);
+    }
 
     // Print address
     API::print_char(' ');
@@ -51,21 +56,25 @@ uint16_t impl_hex(uint16_t row, uint16_t end) {
 // Write pattern from start to end, inclusive
 template <typename API>
 void impl_memset(uint16_t start, uint16_t end, uint8_t pattern) {
+  API::BUS::config_write();
   do {
-    API::write_byte(start, pattern);
+    API::BUS::write_byte(start, pattern);
   } while (start++ != end);
+  API::BUS::flush_write();
 }
 
 // Write string from start until null terminator
 template <typename API>
 uint16_t impl_strcpy(uint16_t start, const char* str) {
+  API::BUS::config_write();
   for (;;) {
     char c = *str++;
     if (c == '\0') {
       return start;
     }
-    API::write_byte(start++, c);
+    API::BUS::write_byte(start++, c);
   }
+  API::BUS::flush_write();
 }
 
 // Copy [start, end] to [dest, dest+end-start] (end inclusive)
@@ -83,19 +92,27 @@ void impl_memmove(uint16_t start, uint16_t end, uint16_t dest) {
   if ((a && b) || (a && c) || (b && c)) {
     // Reverse copy from end to start
     for (uint16_t i = 0; i <= delta; ++i) {
-      API::write_byte(dest_end - i, API::read_byte(end - i));
+      API::BUS::config_read();
+      auto data = API::BUS::read_byte(end - i);
+      API::BUS::config_write();
+      API::BUS::write_byte(dest_end - i, data);
     }
   } else {
     // Forward copy from start to end
     for (uint16_t i = 0; i <= delta; ++i) {
-      API::write_byte(dest + i, API::read_byte(start + i));
+      API::BUS::config_read();
+      auto data = API::BUS::read_byte(start + i);
+      API::BUS::config_write();
+      API::BUS::write_byte(dest + i, data);
     }
   }
+  API::BUS::flush_write();
 }
 
 // Print memory range in IHX format
 template <typename API, uint8_t REC_SIZE = 32>
 void impl_export(uint16_t start, uint16_t size) {
+  API::BUS::config_read();
   while (size > 0) {
     uint8_t rec_size = size > REC_SIZE ? REC_SIZE : size;
     size -= rec_size;
@@ -107,7 +124,7 @@ void impl_export(uint16_t start, uint16_t size) {
     // Print data and checksum
     uint8_t checksum = rec_size + (start >> 8) + (start & 0xFF);
     while (rec_size-- > 0) {
-      uint8_t data = API::read_byte(start++);
+      uint8_t data = API::BUS::read_byte(start++);
       format_hex8(API::print_char, data);
       checksum += data;
     }
@@ -125,7 +142,7 @@ bool read_ihx_data(uint8_t rec_size, uint16_t address, uint8_t checksum) {
   // Read record data
   for (uint8_t i = 0; i < rec_size; ++i) {
     CORE_INPUT_HEX8(API, data, return false);
-    API::write_byte(address + i, data);
+    API::BUS::write_byte(address + i, data);
     checksum += data;
   }
   // Validate checksum
@@ -135,7 +152,9 @@ bool read_ihx_data(uint8_t rec_size, uint16_t address, uint8_t checksum) {
 
 // Read serial data from IHX format into memory
 template <typename API>
-void cmd_import(cli::Args) {
+bool impl_import() {
+  API::BUS::config_write();
+  bool success = false;
   for (;;) {
     // Discard whitespace while looking for start of record (:)
     char c;
@@ -147,13 +166,21 @@ void cmd_import(cli::Args) {
     CORE_INPUT_HEX8(API, rec_type, break);
     uint8_t checksum = rec_size + (address >> 8) + (address & 0xFF) + rec_type;
     if (!read_ihx_data<API>(rec_size, address, checksum)) break;
-    // Exit if record type is not data (00)
+    // Exit successfully if record type is not data (00)
     if (rec_type > 0) {
-      API::newline();
-      return;
+      success = true;
+      break;
     }
   }
-  API::print_char('?');
+  API::BUS::flush_write();
+  return success;
+}
+
+template <typename API>
+void cmd_import(cli::Args) {
+  if (!impl_import<API>()) {
+    API::print_char('?');
+  }
   API::newline();
 }
 
@@ -178,7 +205,8 @@ void cmd_set(cli::Args args) {
       start = impl_strcpy<API>(start, args.next());
     } else {
       CORE_EXPECT_UINT(API, uint8_t, data, args, return);
-      API::write_byte(start++, data);
+      impl_memset<API>(start, start, data);
+      ++start;
     }
   } while (args.has_next());
   set_prompt<API>(args.command(), start);

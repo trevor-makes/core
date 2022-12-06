@@ -69,10 +69,16 @@ struct extend_unsigned<uint32_t> {
   using type = uint64_t;
 };
 
+// http://graphics.stanford.edu/~seander/bithacks.html#DetermineIfPowerOf2
+template <typename T>
+constexpr bool is_power_of_two(T v) {
+  return v && !(v & (v - 1));
+}
+
 template <typename T>
 constexpr T less_one_until_zero(T N) { return N > 0 ? N - 1 : 0; }
 
-//http://graphics.stanford.edu/~seander/bithacks.html#IntegerLog
+// http://graphics.stanford.edu/~seander/bithacks.html#IntegerLog
 template <uint8_t N, typename T, typename R = uint8_t, T S = T(1) << N, T P = ((T(1) << S) - 1)>
 constexpr R ilog2_impl(T v) {
   return N > 0 ? (v > P) << N | ilog2_impl<less_one_until_zero(N)>(v >> ((v > P) << N)) : (v > P);
@@ -117,7 +123,7 @@ static_assert(mask_width(31) == 5, "");
 
 // Return number of consecutive zero bits starting from lsb
 // NOTE std::countr_zero added to <bit> in c++20
-//http://graphics.stanford.edu/~seander/bithacks.html#ZerosOnRightParallel
+// http://graphics.stanford.edu/~seander/bithacks.html#ZerosOnRightParallel
 template <typename T>
 constexpr uint8_t countr_zero(T v) {
   return sizeof(T) * 8

@@ -28,7 +28,7 @@ template <typename API>
 Operand read_imm_byte(uint16_t addr, bool is_indirect = false) {
   uint8_t token = TOK_IMMEDIATE | TOK_BYTE;
   if (is_indirect) token |= TOK_INDIRECT;
-  uint16_t value = API::read_byte(addr);
+  uint16_t value = API::BUS::read_byte(addr);
   return { token, value };
 }
 
@@ -37,8 +37,8 @@ template <typename API>
 Operand read_imm_word(uint16_t addr, bool is_indirect = false) {
   uint8_t token = TOK_IMMEDIATE;
   if (is_indirect) token |= TOK_INDIRECT;
-  uint8_t lsb = API::read_byte(addr);
-  uint8_t msb = API::read_byte(addr + 1);
+  uint8_t lsb = API::BUS::read_byte(addr);
+  uint8_t msb = API::BUS::read_byte(addr + 1);
   uint16_t value = msb << 8 | lsb;
   return { token, value };
 }
@@ -47,7 +47,7 @@ Operand read_imm_word(uint16_t addr, bool is_indirect = false) {
 template <typename API>
 Operand read_branch_disp(uint16_t addr) {
   uint8_t token = TOK_IMMEDIATE;
-  int8_t disp = API::read_byte(addr);
+  int8_t disp = API::BUS::read_byte(addr);
   uint16_t value = addr + 1 + disp;
   return { token, value };
 }
@@ -56,7 +56,7 @@ Operand read_branch_disp(uint16_t addr) {
 template <typename API>
 Operand read_index_ind(uint16_t addr, uint8_t prefix) {
   uint8_t token = (prefix == PREFIX_IX ? TOK_IX : TOK_IY) | TOK_INDIRECT;
-  uint16_t value = int8_t(API::read_byte(addr));
+  uint16_t value = int8_t(API::BUS::read_byte(addr));
   return { token, value };
 }
 
@@ -144,7 +144,7 @@ uint8_t decode_block_ops(Instruction& inst, uint8_t code) {
 // Disassemble extended opcodes prefixed by $ED
 template <typename API>
 uint8_t decode_ed(Instruction& inst, uint16_t addr) {
-  const uint8_t code = API::read_byte(addr);
+  const uint8_t code = API::BUS::read_byte(addr);
   if ((code & 0300) == 0100) {
     switch (code & 07) {
     case 0: case 1:
@@ -178,7 +178,7 @@ template <typename API>
 uint8_t decode_cb(Instruction& inst, uint16_t addr, uint8_t prefix) {
   const bool has_prefix = prefix != 0;
   // If prefixed, index displacement byte comes before opcode
-  const uint8_t code = API::read_byte(has_prefix ? addr + 1 : addr);
+  const uint8_t code = API::BUS::read_byte(has_prefix ? addr + 1 : addr);
   const uint8_t op = (code & 0300) >> 6;
   const uint8_t index = (code & 070) >> 3;
   const uint8_t reg = (code & 07);
@@ -462,7 +462,7 @@ uint8_t decode_misc_hi(Instruction& inst, uint16_t addr, uint8_t code, uint8_t p
 // Decode instruction at address, returning bytes read
 template <typename API>
 uint8_t dasm_instruction(Instruction& inst, uint16_t addr, uint8_t prefix = 0) {
-  uint8_t code = API::read_byte(addr);
+  uint8_t code = API::BUS::read_byte(addr);
   // Handle prefix codes
   if (code == PREFIX_IX || code == PREFIX_ED || code == PREFIX_IY) {
     if (prefix != 0) {

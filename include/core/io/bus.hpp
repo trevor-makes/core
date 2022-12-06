@@ -141,6 +141,9 @@ struct Bus {
     CONTROL::end_read();
     return data;
   }
+
+  // Derived type may use this to flush pending writes
+  static void flush_write() {}
 };
 
 } // namespace io

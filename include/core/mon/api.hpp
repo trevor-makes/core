@@ -7,13 +7,18 @@
 namespace core {
 namespace mon {
 
+// Default implementations for mon API
+// struct API : Base<API> { 
+//   struct BUS { ... };  or  using BUS = ...;
+//   static StreamEx& get_stream() { ... }
+//   static CLI<>& get_cli() { ... }
+// };
 template <typename T, uint8_t LBL_SIZE = 80>
 struct Base {
   static Labels& get_labels() {
     return labels;
   }
 
-  // static StreamEx& get_stream()
   static void print_char(char c) { T::get_stream().print(c); }
   static void print_string(const char* str) { T::get_stream().print(str); }
   static void newline() { T::get_stream().println(); }
@@ -27,16 +32,8 @@ struct Base {
     return c;
   }
 
-  // static CLI<>& get_cli()
   static void prompt_char(char c) { T::get_cli().prompt(c); }
   static void prompt_string(const char* str) { T::get_cli().prompt(str); }
-
-  template <uint8_t N>
-  static void read_bytes(uint16_t addr, uint8_t (&buf)[N]) {
-    for (uint8_t i = 0; i < N; ++i) {
-      buf[i] = T::read_byte(addr + i);
-    }
-  }
 
 private:
   static LabelsOwner<LBL_SIZE> labels;
