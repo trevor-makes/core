@@ -8,7 +8,7 @@
 #include "core/util.hpp"
 
 #define CORE_REG(REG) \
-  using TYPE_##REG = util::remove_volatile_reference<decltype((REG))>::type; \
+  using TYPE_##REG = core::util::remove_volatile_reference<decltype((REG))>::type; \
   \
   template <TYPE_##REG MASK, \
     bool B = (MASK == TYPE_##REG(~0))> \

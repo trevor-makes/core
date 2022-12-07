@@ -7,6 +7,7 @@
 
 #include <stdint.h>
 
+namespace core {
 namespace util {
 
 // C++11 <algorithm>, missing on AVR
@@ -198,3 +199,4 @@ void copy_into_args(const T1 (&from)[N], T2& into, Args&... args) {
 }
 
 } // namespace util
+} // namespace core
