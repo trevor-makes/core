@@ -22,8 +22,8 @@ struct TestAPI : public core::mon::Base<TestAPI> {
     static void config_write() {}
     static void config_float() {}
     static void flush_write() {}
-    static uint8_t read_byte(ADDRESS_TYPE addr) { return test_data[addr % DATA_SIZE]; };
-    static void write_byte(ADDRESS_TYPE addr, DATA_TYPE data) { test_data[addr % DATA_SIZE] = data; }
+    static uint8_t read_data(ADDRESS_TYPE addr) { return test_data[addr % DATA_SIZE]; };
+    static void write_data(ADDRESS_TYPE addr, DATA_TYPE data) { test_data[addr % DATA_SIZE] = data; }
   };
 
   static void prompt_char(char c) { }

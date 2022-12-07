@@ -21,15 +21,15 @@ void print_operand_error(Operand& op) {
 // Write [code] at address and return bytes written
 template <typename API>
 uint8_t write_code(uint16_t addr, uint8_t code) {
-  API::BUS::write_byte(addr, code);
+  API::BUS::write_data(addr, code);
   return 1;
 }
 
 // Write [code, data] at address and return bytes written
 template <typename API>
 uint8_t write_code_byte(uint16_t addr, uint8_t code, uint8_t data) {
-  API::BUS::write_byte(addr, code);
-  API::BUS::write_byte(addr + 1, data);
+  API::BUS::write_data(addr, code);
+  API::BUS::write_data(addr + 1, data);
   return 2;
 }
 
@@ -37,7 +37,7 @@ uint8_t write_code_byte(uint16_t addr, uint8_t code, uint8_t data) {
 template <typename API>
 uint8_t write_pfx_code(uint16_t addr, uint8_t prefix, uint8_t code) {
   bool has_prefix = prefix != 0;
-  if (has_prefix) API::BUS::write_byte(addr++, prefix);
+  if (has_prefix) API::BUS::write_data(addr++, prefix);
   return has_prefix + write_code<API>(addr, code);
 }
 
@@ -46,16 +46,16 @@ template <typename API>
 uint8_t write_pfx_code_idx(uint16_t addr, uint8_t prefix, uint8_t code, Operand& index) {
   bool has_index = index.token == TOK_IX_IND || index.token == TOK_IY_IND;
   uint8_t size = write_pfx_code<API>(addr, prefix, code);
-  if (has_index) API::BUS::write_byte(addr + size, index.value);
+  if (has_index) API::BUS::write_data(addr + size, index.value);
   return has_index + size;
 }
 
 // Write [code, lsb, msb] at address and return bytes written
 template <typename API>
 uint8_t write_code_word(uint16_t addr, uint8_t code, uint16_t data) {
-  API::BUS::write_byte(addr, code);
-  API::BUS::write_byte(addr + 1, data & 0xFF);
-  API::BUS::write_byte(addr + 2, data >> 8);
+  API::BUS::write_data(addr, code);
+  API::BUS::write_data(addr + 1, data & 0xFF);
+  API::BUS::write_data(addr + 2, data >> 8);
   return 3;
 }
 
@@ -63,7 +63,7 @@ uint8_t write_code_word(uint16_t addr, uint8_t code, uint16_t data) {
 template <typename API>
 uint8_t write_pfx_code_word(uint16_t addr, uint8_t prefix, uint8_t code, uint16_t data) {
   bool has_prefix = prefix != 0;
-  if (has_prefix) API::BUS::write_byte(addr++, prefix);
+  if (has_prefix) API::BUS::write_data(addr++, prefix);
   return has_prefix + write_code_word<API>(addr, code, data);
 }
 
@@ -146,10 +146,10 @@ uint8_t write_cb_code(uint16_t addr, uint8_t code, Operand& op) {
   }
   if (prefix != 0) {
     // NOTE index comes before code with double prefix
-    API::BUS::write_byte(addr, prefix);
-    API::BUS::write_byte(addr + 1, PREFIX_CB);
-    API::BUS::write_byte(addr + 2, op.value);
-    API::BUS::write_byte(addr + 3, code | reg);
+    API::BUS::write_data(addr, prefix);
+    API::BUS::write_data(addr + 1, PREFIX_CB);
+    API::BUS::write_data(addr + 2, op.value);
+    API::BUS::write_data(addr + 3, code | reg);
     return 4;
   } else {
     return write_pfx_code<API>(addr, PREFIX_CB, code | reg);
@@ -453,7 +453,7 @@ uint8_t write_ld(uint16_t addr, Operand& dst, Operand& src) {
     } else if (src.token == TOK_IMMEDIATE) {
       uint8_t code = 0006 | dst_reg << 3;
       uint8_t size = write_pfx_code_idx<API>(addr, dst_prefix, code, dst);
-      API::BUS::write_byte(addr + size, src.value);
+      API::BUS::write_data(addr + size, src.value);
       return size + 1;
     }
   } else if (dst_pair != PAIR_INVALID) {

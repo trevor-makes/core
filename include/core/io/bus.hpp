@@ -123,15 +123,14 @@ struct Bus {
     CONTROL::config_float();
   }
 
-  // TODO rename *_byte to *_data or just read/write
-  static void write_byte(ADDRESS_TYPE addr, DATA_TYPE data) {
+  static void write_data(ADDRESS_TYPE addr, DATA_TYPE data) {
     ADDRESS::write(addr);
     CONTROL::begin_write();
     DATA::write(data);
     CONTROL::end_write();
   }
 
-  static DATA_TYPE read_byte(ADDRESS_TYPE addr) {
+  static DATA_TYPE read_data(ADDRESS_TYPE addr) {
     // Re-config direction each read in case ADDRESS is latched from DATA
     ADDRESS::config_output();
     ADDRESS::write(addr);
