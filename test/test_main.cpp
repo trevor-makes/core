@@ -15,8 +15,16 @@ struct TestAPI : public core::mon::Base<TestAPI> {
   static void print_string(const char* str) { test_io.try_insert(str); }
   static void newline() { test_io.try_insert('\n'); }
 
-  static uint8_t read_byte(uint16_t addr) { return test_data[addr % DATA_SIZE]; };
-  static void write_byte(uint16_t addr, uint8_t data) { test_data[addr % DATA_SIZE] = data; }
+  struct BUS {
+    using DATA_TYPE = uint8_t;
+    using ADDRESS_TYPE = uint16_t;
+    static void config_read() {}
+    static void config_write() {}
+    static void config_float() {}
+    static void flush_write() {}
+    static uint8_t read_byte(ADDRESS_TYPE addr) { return test_data[addr % DATA_SIZE]; };
+    static void write_byte(ADDRESS_TYPE addr, DATA_TYPE data) { test_data[addr % DATA_SIZE] = data; }
+  };
 
   static void prompt_char(char c) { }
   static void prompt_string(const char* str) { }
