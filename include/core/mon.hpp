@@ -116,11 +116,13 @@ void impl_export(uint16_t start, uint16_t size) {
   while (size > 0) {
     uint8_t rec_size = size > REC_SIZE ? REC_SIZE : size;
     size -= rec_size;
+
     // Print record header
     API::print_char(':');
     format_hex8(API::print_char, rec_size);
     format_hex16(API::print_char, start);
     format_hex8(API::print_char, 0);
+
     // Print data and checksum
     uint8_t checksum = rec_size + (start >> 8) + (start & 0xFF);
     while (rec_size-- > 0) {
@@ -136,49 +138,67 @@ void impl_export(uint16_t start, uint16_t size) {
   API::newline();
 }
 
-// Read one line of IHX data plus checksum
-template <typename API>
-bool read_ihx_data(uint8_t rec_size, uint16_t address, uint8_t checksum) {
-  // Read record data
-  for (uint8_t i = 0; i < rec_size; ++i) {
-    CORE_INPUT_HEX8(API, data, return false);
-    API::BUS::write_byte(address + i, data);
-    checksum += data;
-  }
-  // Validate checksum
-  CORE_INPUT_HEX8(API, data, return false);
-  return uint8_t(checksum + data) == 0;
-}
-
-// Read serial data from IHX format into memory
-template <typename API>
-bool impl_import() {
-  API::BUS::config_write();
-  bool success = false;
+// Parse serial data in IHX format
+template <typename API, typename F>
+bool parse_ihx(F&& handle_byte) {
   for (;;) {
     // Discard whitespace while looking for start of record (:)
     char c;
     do { c = API::input_char(); } while (isspace(c));
-    if (c != ':') break;
+    if (c != ':') return false;
+
     // Parse record header and data
-    CORE_INPUT_HEX8(API, rec_size, break);
-    CORE_INPUT_HEX16(API, address, break);
-    CORE_INPUT_HEX8(API, rec_type, break);
+    CORE_INPUT_HEX8(API, rec_size, return false);
+    CORE_INPUT_HEX16(API, address, return false);
+    CORE_INPUT_HEX8(API, rec_type, return false);
     uint8_t checksum = rec_size + (address >> 8) + (address & 0xFF) + rec_type;
-    if (!read_ihx_data<API>(rec_size, address, checksum)) break;
+
+    // Read record data
+    for (uint8_t i = 0; i < rec_size; ++i) {
+      CORE_INPUT_HEX8(API, data, return false);
+      handle_byte(address + i, data);
+      checksum += data;
+    }
+
+    // Validate checksum
+    CORE_INPUT_HEX8(API, neg_checksum, return false);
+    if (uint8_t(checksum + neg_checksum) != 0) return false;
+
     // Exit successfully if record type is not data (00)
     if (rec_type > 0) {
-      success = true;
-      break;
+      return true;
     }
   }
-  API::BUS::flush_write();
-  return success;
 }
 
+// Write IHX stream into memory
 template <typename API>
 void cmd_import(cli::Args) {
-  if (!impl_import<API>()) {
+  API::BUS::config_write();
+  if (!parse_ihx<API>(API::BUS::write_byte)) {
+    // Error parsing IHX
+    API::print_char('?');
+  }
+  API::newline();
+  API::BUS::flush_write();
+}
+
+// Validate IHX stream against memory
+template <typename API>
+void cmd_validate(cli::Args) {
+  API::BUS::config_read();
+  bool success = true;
+  auto validate_fn = [&success](uint16_t address, uint8_t data) {
+    if (API::BUS::read_byte(address) != data) {
+      API::print_char('*');
+      success = false;
+    }
+  };
+  if (parse_ihx<API>(validate_fn)) {
+    API::newline();
+    API::print_string(success ? "PASS" : "FAIL");
+  } else {
+    // Error parsing IHX
     API::print_char('?');
   }
   API::newline();
