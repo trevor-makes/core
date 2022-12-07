@@ -235,16 +235,16 @@ void cmd_import(cli::Args) {
 
 // Validate IHX stream against memory
 template <typename API>
-void cmd_validate(cli::Args) {
+void cmd_verify(cli::Args) {
   API::BUS::config_read();
   bool success = true;
-  auto validate_fn = [&success](uint16_t address, uint8_t data) {
+  auto verify_fn = [&success](uint16_t address, uint8_t data) {
     if (API::BUS::read_byte(address) != data) {
       API::print_char('*');
       success = false;
     }
   };
-  if (parse_ihx<API>(validate_fn)) {
+  if (parse_ihx<API>(verify_fn)) {
     API::newline();
     API::print_string(success ? "PASS" : "FAIL");
   } else {
