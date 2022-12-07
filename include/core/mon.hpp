@@ -12,7 +12,6 @@
 namespace core {
 namespace mon {
 
-// Dump memory as hex/ascii from row to end, inclusive
 template <typename API, uint8_t COL_SIZE = 16, uint8_t MAX_ROWS = 24>
 uint16_t impl_hex(uint16_t row, uint16_t end) {
   API::BUS::config_read();
@@ -53,20 +52,41 @@ uint16_t impl_hex(uint16_t row, uint16_t end) {
   return row;
 }
 
+// Dump memory as hex/ascii from row to end, inclusive
+template <typename API, uint8_t COL_SIZE = 16, uint8_t MAX_ROWS = 24>
+void cmd_hex(cli::Args args) {
+  // Default size to one row if not provided
+  CORE_EXPECT_ADDR(API, uint16_t, start, args, return);
+  CORE_OPTION_UINT(API, uint16_t, size, COL_SIZE, args, return);
+  uint16_t end_incl = start + size - 1;
+  uint16_t next = impl_hex<API, COL_SIZE, MAX_ROWS>(start, end_incl);
+  uint16_t part = next - start;
+  if (part < size) {
+    set_prompt<API>(args.command(), next, size - part);
+  }
+}
+
 // Write pattern from start to end, inclusive
 template <typename API>
 void impl_memset(uint16_t start, uint16_t end, uint8_t pattern) {
-  API::BUS::config_write();
   do {
     API::BUS::write_byte(start, pattern);
   } while (start++ != end);
+}
+
+template <typename API>
+void cmd_fill(cli::Args args) {
+  CORE_EXPECT_ADDR(API, uint16_t, start, args, return);
+  CORE_EXPECT_UINT(API, uint16_t, size, args, return);
+  CORE_EXPECT_UINT(API, uint8_t, pattern, args, return);
+  API::BUS::config_write();
+  impl_memset<API>(start, start + size - 1, pattern);
   API::BUS::flush_write();
 }
 
 // Write string from start until null terminator
 template <typename API>
 uint16_t impl_strcpy(uint16_t start, const char* str) {
-  API::BUS::config_write();
   for (;;) {
     char c = *str++;
     if (c == '\0') {
@@ -74,7 +94,22 @@ uint16_t impl_strcpy(uint16_t start, const char* str) {
     }
     API::BUS::write_byte(start++, c);
   }
+}
+
+template <typename API>
+void cmd_set(cli::Args args) {
+  CORE_EXPECT_ADDR(API, uint16_t, start, args, return);
+  API::BUS::config_write();
+  do {
+    if (args.is_string()) {
+      start = impl_strcpy<API>(start, args.next());
+    } else {
+      CORE_EXPECT_UINT(API, uint8_t, data, args, return);
+      API::BUS::write_byte(start++, data);
+    }
+  } while (args.has_next());
   API::BUS::flush_write();
+  set_prompt<API>(args.command(), start);
 }
 
 // Copy [start, end] to [dest, dest+end-start] (end inclusive)
@@ -109,6 +144,14 @@ void impl_memmove(uint16_t start, uint16_t end, uint16_t dest) {
   API::BUS::flush_write();
 }
 
+template <typename API>
+void cmd_move(cli::Args args) {
+  CORE_EXPECT_ADDR(API, uint16_t, start, args, return);
+  CORE_EXPECT_UINT(API, uint16_t, size, args, return);
+  CORE_EXPECT_ADDR(API, uint16_t, dest, args, return);
+  impl_memmove<API>(start, start + size - 1, dest);
+}
+
 // Print memory range in IHX format
 template <typename API, uint8_t REC_SIZE = 32>
 void impl_export(uint16_t start, uint16_t size) {
@@ -136,6 +179,13 @@ void impl_export(uint16_t start, uint16_t size) {
   // Print end-of-file record
   API::print_string(":00000001FF");
   API::newline();
+}
+
+template <typename API, uint8_t REC_SIZE = 32>
+void cmd_export(cli::Args args) {
+  CORE_EXPECT_ADDR(API, uint16_t, start, args, return);
+  CORE_EXPECT_UINT(API, uint16_t, size, args, return);
+  impl_export<API, REC_SIZE>(start, size);
 }
 
 // Parse serial data in IHX format
@@ -202,57 +252,6 @@ void cmd_validate(cli::Args) {
     API::print_char('?');
   }
   API::newline();
-}
-
-template <typename API, uint8_t COL_SIZE = 16, uint8_t MAX_ROWS = 24>
-void cmd_hex(cli::Args args) {
-  // Default size to one row if not provided
-  CORE_EXPECT_ADDR(API, uint16_t, start, args, return);
-  CORE_OPTION_UINT(API, uint16_t, size, COL_SIZE, args, return);
-  uint16_t end_incl = start + size - 1;
-  uint16_t next = impl_hex<API, COL_SIZE, MAX_ROWS>(start, end_incl);
-  uint16_t part = next - start;
-  if (part < size) {
-    set_prompt<API>(args.command(), next, size - part);
-  }
-}
-
-template <typename API>
-void cmd_set(cli::Args args) {
-  CORE_EXPECT_ADDR(API, uint16_t, start, args, return);
-  do {
-    if (args.is_string()) {
-      start = impl_strcpy<API>(start, args.next());
-    } else {
-      CORE_EXPECT_UINT(API, uint8_t, data, args, return);
-      impl_memset<API>(start, start, data);
-      ++start;
-    }
-  } while (args.has_next());
-  set_prompt<API>(args.command(), start);
-}
-
-template <typename API>
-void cmd_fill(cli::Args args) {
-  CORE_EXPECT_ADDR(API, uint16_t, start, args, return);
-  CORE_EXPECT_UINT(API, uint16_t, size, args, return);
-  CORE_EXPECT_UINT(API, uint8_t, pattern, args, return);
-  impl_memset<API>(start, start + size - 1, pattern);
-}
-
-template <typename API>
-void cmd_move(cli::Args args) {
-  CORE_EXPECT_ADDR(API, uint16_t, start, args, return);
-  CORE_EXPECT_UINT(API, uint16_t, size, args, return);
-  CORE_EXPECT_ADDR(API, uint16_t, dest, args, return);
-  impl_memmove<API>(start, start + size - 1, dest);
-}
-
-template <typename API, uint8_t REC_SIZE = 32>
-void cmd_export(cli::Args args) {
-  CORE_EXPECT_ADDR(API, uint16_t, start, args, return);
-  CORE_EXPECT_UINT(API, uint16_t, size, args, return);
-  impl_export<API, REC_SIZE>(start, size);
 }
 
 template <typename API>
