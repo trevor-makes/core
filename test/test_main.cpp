@@ -1,5 +1,6 @@
 #include "core/mon/z80.hpp"
 #include "core/mon/api.hpp"
+#include "core/io/bus.hpp"
 
 #include <unity.h>
 
@@ -15,16 +16,7 @@ struct TestAPI : public core::mon::Base<TestAPI> {
   static void print_string(const char* str) { test_io.try_insert(str); }
   static void newline() { test_io.try_insert('\n'); }
 
-  struct BUS {
-    using DATA_TYPE = uint8_t;
-    using ADDRESS_TYPE = uint16_t;
-    static void config_read() {}
-    static void config_write() {}
-    static void config_float() {}
-    static void flush_write() {}
-    static uint8_t read_data(ADDRESS_TYPE addr) { return test_data[addr % DATA_SIZE]; };
-    static void write_data(ADDRESS_TYPE addr, DATA_TYPE data) { test_data[addr % DATA_SIZE] = data; }
-  };
+  using BUS = CORE_ARRAY_BUS(test_data, uint16_t);
 
   static void prompt_char(char c) { }
   static void prompt_string(const char* str) { }

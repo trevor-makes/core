@@ -6,6 +6,7 @@
 #include "core/arduino.hpp"
 
 #include <stdint.h>
+#include <stddef.h>
 
 namespace core {
 namespace util {
@@ -28,6 +29,15 @@ constexpr auto clamp(A val, B low, C high) -> decltype(val + low + high) {
   return (val > high) ? high : ((val < low) ? low : val);
 }
 
+// Convert type <T&> to T
+template <typename>
+struct remove_reference;
+
+template <typename T>
+struct remove_reference<T&> {
+  using type = T;
+};
+
 // Convert type <volatile T&> to T
 template <typename>
 struct remove_volatile_reference;
@@ -49,6 +59,7 @@ struct is_same<TYPE, TYPE> {
 };
 
 static_assert(is_same<volatile float&, float>::value == false, "");
+static_assert(is_same<remove_reference<float&>::type, float>::value == true, "");
 static_assert(is_same<remove_volatile_reference<volatile float&>::type, float>::value == true, "");
 
 // Get unsigned type with doubled word size

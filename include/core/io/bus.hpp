@@ -147,10 +147,11 @@ struct Bus {
   static void flush_write() {}
 };
 
-template <uint16_t SIZE, uint8_t (&ARRAY)[SIZE]>
+// Use CORE_ARRAY_BUS(array, address_t) to generate template parameters
+template <typename DATA, typename ADDRESS, ADDRESS SIZE, DATA (&ARRAY)[SIZE]>
 struct ArrayBus {
-  using DATA_TYPE = uint8_t;
-  using ADDRESS_TYPE = uint16_t;
+  using DATA_TYPE = DATA;
+  using ADDRESS_TYPE = ADDRESS;
   static void config_read() {}
   static void config_write() {}
   static void config_float() {}
@@ -162,4 +163,5 @@ struct ArrayBus {
 } // namespace io
 } // namespace core
 
-#define CORE_ARRAY_BUS(ARRAY) core::io::ArrayBus<core::util::array_length(ARRAY), ARRAY>
+// Create a Bus-like read/write interface around an array with the given address type
+#define CORE_ARRAY_BUS(ARRAY, ADDRESS) core::io::ArrayBus<core::util::remove_reference<decltype(ARRAY[0])>::type, ADDRESS, core::util::array_length(ARRAY), ARRAY>
