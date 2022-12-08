@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "core/util.hpp"
+
 #include <stdint.h>
 
 namespace core {
@@ -145,5 +147,19 @@ struct Bus {
   static void flush_write() {}
 };
 
+template <uint16_t SIZE, uint8_t (&ARRAY)[SIZE]>
+struct ArrayBus {
+  using DATA_TYPE = uint8_t;
+  using ADDRESS_TYPE = uint16_t;
+  static void config_read() {}
+  static void config_write() {}
+  static void config_float() {}
+  static DATA_TYPE read_data(ADDRESS_TYPE addr) { return ARRAY[addr % SIZE]; }
+  static void write_data(ADDRESS_TYPE addr, DATA_TYPE data) { ARRAY[addr % SIZE] = data; }
+  static void flush_write() {}
+};
+
 } // namespace io
 } // namespace core
+
+#define CORE_ARRAY_BUS(ARRAY) core::io::ArrayBus<core::util::array_length(ARRAY), ARRAY>

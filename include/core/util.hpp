@@ -198,5 +198,8 @@ void copy_into_args(const T1 (&from)[N], T2& into, Args&... args) {
   copy_into_args<I + 1>(from, args...);
 }
 
+template <typename T, size_t N>
+constexpr size_t array_length(T(&)[N]) { return N; }
+
 } // namespace util
 } // namespace core
