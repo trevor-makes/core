@@ -133,8 +133,9 @@ struct Bus {
   }
 
   static DATA_TYPE read_data(ADDRESS_TYPE addr) {
-    // Re-config direction each read in case ADDRESS is latched from DATA
-    ADDRESS::config_output();
+    // Re-config data direction each read in case ADDRESS is latched from DATA
+    // TODO add template to determine if DATA and ADDRESS have any overlapping bits; only do DATA::config_out/in if true
+    DATA::config_output();
     ADDRESS::write(addr);
     DATA::config_input();
     CONTROL::begin_read();
