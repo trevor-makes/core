@@ -20,7 +20,7 @@ uint16_t impl_hex(uint16_t row, uint16_t end) {
   for (uint8_t i = 0; i < MAX_ROWS; ++i) {
     // Read row into temp buffer
     for (uint8_t j = 0; j < COL_SIZE; ++j) {
-      row_data[j] = API::BUS::read_data(row + j);
+      row_data[j] = API::BUS::read_bus(row + j);
     }
 
     // Print address
@@ -70,7 +70,7 @@ void cmd_hex(cli::Args args) {
 template <typename API>
 void impl_memset(uint16_t start, uint16_t end, uint8_t pattern) {
   do {
-    API::BUS::write_data(start, pattern);
+    API::BUS::write_bus(start, pattern);
   } while (start++ != end);
 }
 
@@ -92,7 +92,7 @@ uint16_t impl_strcpy(uint16_t start, const char* str) {
     if (c == '\0') {
       return start;
     }
-    API::BUS::write_data(start++, c);
+    API::BUS::write_bus(start++, c);
   }
 }
 
@@ -105,7 +105,7 @@ void cmd_set(cli::Args args) {
       start = impl_strcpy<API>(start, args.next());
     } else {
       CORE_EXPECT_UINT(API, uint8_t, data, args, return);
-      API::BUS::write_data(start++, data);
+      API::BUS::write_bus(start++, data);
     }
   } while (args.has_next());
   API::BUS::flush_write();
@@ -128,17 +128,17 @@ void impl_memmove(uint16_t start, uint16_t end, uint16_t dest) {
     // Reverse copy from end to start
     for (uint16_t i = 0; i <= delta; ++i) {
       API::BUS::config_read();
-      auto data = API::BUS::read_data(end - i);
+      auto data = API::BUS::read_bus(end - i);
       API::BUS::config_write();
-      API::BUS::write_data(dest_end - i, data);
+      API::BUS::write_bus(dest_end - i, data);
     }
   } else {
     // Forward copy from start to end
     for (uint16_t i = 0; i <= delta; ++i) {
       API::BUS::config_read();
-      auto data = API::BUS::read_data(start + i);
+      auto data = API::BUS::read_bus(start + i);
       API::BUS::config_write();
-      API::BUS::write_data(dest + i, data);
+      API::BUS::write_bus(dest + i, data);
     }
   }
   API::BUS::flush_write();
@@ -169,7 +169,7 @@ void impl_export(uint16_t start, uint16_t size) {
     // Print data and checksum
     uint8_t checksum = rec_size + (start >> 8) + (start & 0xFF);
     while (rec_size-- > 0) {
-      uint8_t data = API::BUS::read_data(start++);
+      uint8_t data = API::BUS::read_bus(start++);
       format_hex8(API::print_char, data);
       checksum += data;
     }
@@ -225,7 +225,7 @@ bool parse_ihx(F&& handle_byte) {
 template <typename API>
 void cmd_import(cli::Args) {
   API::BUS::config_write();
-  if (!parse_ihx<API>(API::BUS::write_data)) {
+  if (!parse_ihx<API>(API::BUS::write_bus)) {
     // Error parsing IHX
     API::print_char('?');
   }
@@ -239,7 +239,7 @@ void cmd_verify(cli::Args) {
   API::BUS::config_read();
   bool success = true;
   auto verify_fn = [&success](uint16_t address, uint8_t data) {
-    if (API::BUS::read_data(address) != data) {
+    if (API::BUS::read_bus(address) != data) {
       API::print_char('*');
       success = false;
     }

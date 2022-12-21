@@ -65,8 +65,8 @@ struct Latch {
 };
 
 // Derived type should define
-// static void write_data(ADDRESS_TYPE addr, DATA_TYPE data)
-// static DATA_TYPE read_data(ADDRESS_TYPE addr)
+// static void write_bus(ADDRESS_TYPE addr, DATA_TYPE data)
+// static DATA_TYPE read_bus(ADDRESS_TYPE addr)
 // static void config_float() [if used]
 struct BaseBus {
   static void config_write() {}
@@ -79,8 +79,8 @@ template <typename DATA, typename ADDRESS, ADDRESS SIZE, DATA (&ARRAY)[SIZE]>
 struct ArrayBus : BaseBus {
   using DATA_TYPE = DATA;
   using ADDRESS_TYPE = ADDRESS;
-  static DATA_TYPE read_data(ADDRESS_TYPE addr) { return ARRAY[addr % SIZE]; }
-  static void write_data(ADDRESS_TYPE addr, DATA_TYPE data) { ARRAY[addr % SIZE] = data; }
+  static DATA_TYPE read_bus(ADDRESS_TYPE addr) { return ARRAY[addr % SIZE]; }
+  static void write_bus(ADDRESS_TYPE addr, DATA_TYPE data) { ARRAY[addr % SIZE] = data; }
 };
 
 } // namespace io
