@@ -11,7 +11,7 @@ namespace io {
 
 template <typename PIN>
 struct ActiveLow {
-  static inline void config_active() {
+  static inline void config_output() {
     disable();
     PIN::config_output();
   }
@@ -28,7 +28,7 @@ struct ActiveLow {
 
 template <typename PIN>
 struct ActiveHigh {
-  static inline void config_active() {
+  static inline void config_output() {
     disable();
     PIN::config_output();
   }
@@ -47,9 +47,9 @@ struct ActiveHigh {
 template <typename OUTPUT_ENABLE, typename WRITE_ENABLE>
 struct Control {
   // Configure ports to drive control lines
-  static inline void config_active() {
-    OUTPUT_ENABLE::config_active();
-    WRITE_ENABLE::config_active();
+  static inline void config_output() {
+    OUTPUT_ENABLE::config_output();
+    WRITE_ENABLE::config_output();
   }
 
   // Configure ports to float for external control
@@ -85,7 +85,7 @@ struct Latch {
   static inline void config_output() {
     // TODO enable OUTPUT_ENABLE
     DATA::config_output();
-    LATCH_ENABLE::config_active();
+    LATCH_ENABLE::config_output();
   }
   static inline void config_input() {
     // TODO disable OUTPUT_ENABLE
@@ -99,8 +99,18 @@ struct Latch {
   }
 };
 
+// Derived type should define
+// static void write_data(ADDRESS_TYPE addr, DATA_TYPE data)
+// static DATA_TYPE read_data(ADDRESS_TYPE addr)
+// static void config_float() [if used]
+struct BaseBus {
+  static void config_write() {}
+  static void config_read() {}
+  static void flush_write() {}
+};
+
 template <typename ADDRESS, typename DATA, typename CONTROL>
-struct Bus {
+struct PortBus : BaseBus {
   using ADDRESS_TYPE = typename ADDRESS::TYPE;
   using DATA_TYPE = typename DATA::TYPE;
 
@@ -143,22 +153,15 @@ struct Bus {
     CONTROL::end_read();
     return data;
   }
-
-  // Derived type may use this to flush pending writes
-  static void flush_write() {}
 };
 
 // Use CORE_ARRAY_BUS(array, address_t) to generate template parameters
 template <typename DATA, typename ADDRESS, ADDRESS SIZE, DATA (&ARRAY)[SIZE]>
-struct ArrayBus {
+struct ArrayBus : BaseBus {
   using DATA_TYPE = DATA;
   using ADDRESS_TYPE = ADDRESS;
-  static void config_read() {}
-  static void config_write() {}
-  static void config_float() {}
   static DATA_TYPE read_data(ADDRESS_TYPE addr) { return ARRAY[addr % SIZE]; }
   static void write_data(ADDRESS_TYPE addr, DATA_TYPE data) { ARRAY[addr % SIZE] = data; }
-  static void flush_write() {}
 };
 
 } // namespace io
