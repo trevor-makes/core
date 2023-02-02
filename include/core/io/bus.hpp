@@ -16,7 +16,6 @@ struct ActiveLow {
     PIN::config_output();
   }
   static inline void config_input() { PIN::config_input(); }
-  static inline void config_float() { PIN::config_input(); }
   static inline void enable() { PIN::clear(); }
   static inline void disable() { PIN::set(); }
   static inline bool is_enabled() { return PIN::is_clear(); }
@@ -29,7 +28,6 @@ struct ActiveHigh {
     PIN::config_output();
   }
   static inline void config_input() { PIN::config_input(); }
-  static inline void config_float() { PIN::config_input(); }
   static inline void enable() { PIN::set(); }
   static inline void disable() { PIN::clear(); }
   static inline bool is_enabled() { return PIN::is_set(); }
@@ -38,7 +36,6 @@ struct ActiveHigh {
 struct LogicNull {
   static inline void config_output() {}
   static inline void config_input() {}
-  static inline void config_float() {}
   static inline void enable() {}
   static inline void disable() {}
   static inline bool is_enabled() { return false; }
@@ -53,7 +50,7 @@ struct Latch {
     DATA::config_output();
     LATCH_ENABLE::config_output();
   }
-  static inline void config_float() {
+  static inline void config_input() {
     OUTPUT_ENABLE::config_output();
     OUTPUT_ENABLE::disable();
   }
@@ -64,13 +61,16 @@ struct Latch {
   }
 };
 
-// Derived type should define
+// Derived type should define the following:
+// typename DATA_TYPE
+// typename ADDRESS_TYPE
 // static void write_bus(ADDRESS_TYPE addr, DATA_TYPE data)
 // static DATA_TYPE read_bus(ADDRESS_TYPE addr)
-// static void config_float() [if used]
+// static void config_write()
+// static void config_read()
+// static void config_float()
+// TODO maybe add CRTP to enforce this
 struct BaseBus {
-  static void config_write() {}
-  static void config_read() {}
   static void flush_write() {}
 };
 
@@ -79,6 +79,9 @@ template <typename DATA, typename ADDRESS, ADDRESS SIZE, DATA (&ARRAY)[SIZE]>
 struct ArrayBus : BaseBus {
   using DATA_TYPE = DATA;
   using ADDRESS_TYPE = ADDRESS;
+  static void config_write() {}
+  static void config_read() {}
+  static void config_float() {}
   static DATA_TYPE read_bus(ADDRESS_TYPE addr) { return ARRAY[addr % SIZE]; }
   static void write_bus(ADDRESS_TYPE addr, DATA_TYPE data) { ARRAY[addr % SIZE] = data; }
 };
