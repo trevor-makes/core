@@ -11,6 +11,18 @@
 namespace core {
 namespace util {
 
+// Insert N cycle delay
+template <uint8_t N = 1>
+void nop() {
+  __asm__ __volatile__ ("nop");
+  nop<N - 1>();
+}
+
+// Base case of recursive template
+// Must be `inline` since it lacks template parameters
+template <>
+inline void nop<0>() {}
+
 // C++11 <algorithm>, missing on AVR
 template <typename A, typename B>
 constexpr auto min(A a, B b) -> decltype(a + b) {
@@ -179,7 +191,13 @@ static_assert(countl_zero(uint32_t(0x80000000)) == 0, "");
 static_assert(countl_zero(uint32_t(0xF0F0F0F0)) == 0, "");
 static_assert(countl_zero(uint32_t(0x0F0F0F0F)) == 4, "");
 
-uint8_t reverse_bits(uint8_t b);
+inline uint8_t reverse_bits(uint8_t b) {
+  // https://stackoverflow.com/a/2602885
+  b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
+  b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
+  b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
+  return b;
+}
 
 // Fill array with function arguments
 template <uint8_t I = 0, typename T1, typename T2, uint8_t N>
