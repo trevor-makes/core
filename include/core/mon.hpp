@@ -277,8 +277,10 @@ void cmd_label(cli::Args args) {
     const char* name;
     for (uint8_t i = 0; i < labels.entries(); ++i) {
       labels.get_index(i, name, addr);
+      API::print_string(args.command());
+      API::print_char(' ');
       API::print_string(name);
-      API::print_string(": $");
+      API::print_string(" $");
       format_hex16(API::print_char, addr);
       API::newline();
     }
