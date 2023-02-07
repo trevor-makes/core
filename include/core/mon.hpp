@@ -109,7 +109,6 @@ void cmd_set(cli::Args args) {
     }
   } while (args.has_next());
   API::BUS::flush_write();
-  set_prompt<API>(args.command(), start);
 }
 
 // Copy [start, end] to [dest, dest+end-start] (end inclusive)
