@@ -247,12 +247,17 @@ struct WordExtend<PortMSB, PortLSB> {
   }
 };
 
+template <typename ...>
+struct BitExtend;
+
 // TODO use WordExtend when mask width exceeds type width
-// TODO make variadic template 
 template <typename PORT_MSB, typename PORT_LSB>
-using BitExtend = Overlay<
+struct BitExtend<PORT_MSB, PORT_LSB> : Overlay<
   LeftShift<RightAlign<PORT_MSB>, util::mask_width(RightAlign<PORT_LSB>::MASK)>,
-  RightAlign<PORT_LSB>>;
+  RightAlign<PORT_LSB>> {};
+
+template <typename MSB, typename... LSB>
+struct BitExtend<MSB, LSB...> : BitExtend<MSB, BitExtend<LSB...>> {};
 
 } // namespace io
 } // namespace core
