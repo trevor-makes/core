@@ -150,8 +150,8 @@ struct Port : PORT::Output, PIN::Input {
 
   // Configure port as input
   static inline void config_input() {
-    PORT::clear(); //< Clear bits in PORT to disable pullups
     DDR::clear(); //< Clear bits in DDR to select read mode
+    PORT::clear(); //< Clear bits in PORT to disable pullups
   }
 
   // Configure port as input with pullup registers
