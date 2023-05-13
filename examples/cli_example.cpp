@@ -5,7 +5,7 @@
 using core::cli::CLI;
 using core::cli::Command;
 using core::serial::StreamEx;
-using core::cli::Tokens;
+using core::cli::Args;
 
 StreamEx serial_ex(Serial);
 CLI<> serial_cli(serial_ex);
@@ -15,8 +15,8 @@ void setup() {
   while (!Serial) {}
 }
 
-void do_add(Tokens);
-void do_echo(Tokens);
+void do_add(Args);
+void do_echo(Args);
 
 void loop() {
   // command list can be global or static local
@@ -24,10 +24,10 @@ void loop() {
     { "add", do_add }, // call do_add when "add" is entered
     { "echo", do_echo }, // call do_echo when "echo" is entered
   };
-  serial_cli.prompt(commands);
+  serial_cli.run_once(commands);
 }
 
-void do_add(Tokens args) {
+void do_add(Args args) {
   int a = atoi(args.next());
   int b = atoi(args.next());
   serial_ex.print(a);
@@ -37,6 +37,6 @@ void do_add(Tokens args) {
   serial_ex.println(a + b);
 }
 
-void do_echo(Tokens args) {
+void do_echo(Args args) {
   serial_ex.println(args.next());
 }
