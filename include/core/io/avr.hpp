@@ -106,12 +106,6 @@
 namespace core {
 namespace io {
 
-template <typename TYPE>
-struct Config {
-  TYPE ddr;
-  TYPE port;
-};
-
 template <typename DDR, typename PORT, typename PIN>
 struct Port : PORT::Output, PIN::Input {
   static_assert((DDR::MASK == PORT::MASK) && (PORT::MASK == PIN::MASK),
