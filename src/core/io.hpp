@@ -8,6 +8,8 @@
 
 #ifdef __AVR_ARCH__
 #include "io/avr.hpp"
+#elif ARDUINO_ARCH_RENESAS
+#include "io/renesas.hpp"
 #endif
 
 namespace core {
