@@ -1,37 +1,32 @@
-#include "core/io.hpp"
+#include <core.h>
 
-#include <Arduino.h>
-
+#if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_NANO)
 CORE_PORT(B)
-CORE_PORT(C)
-CORE_PORT(D)
-
-void copy_portC_to_portD() {
-    // Configure I/O port C as input
-    PortC::config_input(); // DDRC = 0x00; PORTC = 0x00; [OUT, OUT]
-
-    // Configure I/O port D as output
-    PortD::config_output(); // DDRD = 0xFF; [LDI, OUT]
-
-    // Read from port C and write value to port D
-    PortD::write(PortC::read()); // PORTD = PINC; [IN, OUT]
-}
-
-// True for Arduino Uno; use different pin for other boards
 using LEDPin = PortB::Bit<5>;
 
+#elif ARDUINO_ARCH_RENESAS
+using Port1 = core::io::Port<R_PORT1_BASE>;
+using LEDPin = Port1::Bit<11>;
+#endif
+
 void setup() {
-    // Configure pin as output
-    LEDPin::config_output(); // DDRB |= (1 << 5); [SBI]
+  // Configure pin as output
+  // DDRB |= (1 << 5); (AVR)
+  // R_PORT1->PDR |= bit(11); (Renesas)
+  LEDPin::config_output();
 }
 
 // Blink LED at 1/2 Hz
 void loop() {
-    // Set pin high for 1 second
-    LEDPin::set(); // PORTB |= (1 << 5); [SBI]
-    delay(1000);
+  // Set pin high for 1 second
+  // PORTB |= (1 << 5); (AVR)
+  // R_PORT1->POSR = bit(11); (Renesas)
+  LEDPin::set();
+  delay(1000);
 
-    // Set pin low for 1 second
-    LEDPin::clear(); // PORTB &= ~(1 << 5); [CBI]
-    delay(1000);
+  // Set pin low for 1 second
+  // PORTB &= ~bit(5); (AVR)
+  // R_PORT1->PORR = bit(11); (Renesas)
+  LEDPin::clear();
+  delay(1000);
 }
