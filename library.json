@@ -1,7 +1,7 @@
 {
   "name": "core",
   "version": "0.0.0",
-  "description": "core is a framework for building rich microcontroller applications",
+  "description": "kitchen sink utilities for Arduino projects",
   "keywords": "",
   "repository":
   {
