@@ -5,7 +5,7 @@ CORE_PORT(B)
 using LEDPin = PortB::Bit<5>;
 
 #elif ARDUINO_ARCH_RENESAS
-using Port1 = core::io::Port<R_PORT1_BASE>;
+CORE_PORT(1)
 using LEDPin = Port1::Bit<11>;
 #endif
 
