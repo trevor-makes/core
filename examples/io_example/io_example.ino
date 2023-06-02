@@ -12,7 +12,7 @@ using LEDPin = Port1::Bit<11>;
 void setup() {
   // Configure pin as output
   // DDRB |= (1 << 5); (AVR)
-  // R_PORT1->PDR |= bit(11); (Renesas)
+  // R_PFS->PORT[1].PIN[11].PmnPFS = bit(2); (Renesas)
   LEDPin::config_output();
 }
 

@@ -5,19 +5,16 @@
 #include <stdint.h>
 
 #define CORE_PORT(X) \
-/* TODO need R_PFS->PORT[n] */ \
-template <uint16_t MASK = uint16_t(~0), bool B = (MASK == uint16_t(~0))> \
+template <uint16_t MASK, bool B = (MASK == uint16_t(~0))> \
 struct _Port##X; \
 \
-using Port##X = _Port##X<>;\
+using Port##X = _Port##X<~0>;\
 \
-/* Unmasked port optimizations */ \
+/* TODO maybe add functions for open-drain, high-Z, drive capability, etc */ \
 template <uint16_t M> \
-struct _Port##X<M, true> { \
+struct _PortBase##X { \
   using TYPE = uint16_t; \
   static const TYPE MASK = M; \
-  static_assert(MASK == uint16_t(~0), \
-    "Unmasked port should have all MASK bits set"); \
 \
   /* Select bit within I/O port */ \
   template <uint8_t BIT> \
@@ -27,22 +24,40 @@ struct _Port##X<M, true> { \
   template <uint8_t SUBMASK> \
   using Mask = _Port##X<SUBMASK>; \
 \
+  template <uint16_t BITS = M, uint8_t I = 0> \
+  static inline void set_pfs(uint32_t pfs) { \
+    if constexpr (BITS & 1) { \
+      R_PFS->PORT[X].PIN[I].PmnPFS = pfs; \
+    } \
+    if constexpr (BITS > 0) { \
+      set_pfs<(BITS >> 1), I + 1>(pfs); \
+    } \
+  } \
+\
   /* Configure port as output */ \
   static inline void config_output() { \
-    R_PORT##X->PDR = MASK; \
+    /* R_PORT##X->PDR |= M; */ \
+    set_pfs(bit(2)); /* set PIDR */ \
   } \
 \
   /* Configure port as input */ \
   static inline void config_input() { \
-    R_PORT##X->PDR = 0; /* select read mode */ \
-    /* TODO need to use R_PFS to disable pullups */ \
+    /* R_PORT##X->PDR &= TYPE(~M); */ \
+    set_pfs(0); \
   } \
 \
   /* Configure port as input with pullup registers */ \
   static inline void config_input_pullups() { \
-    /* TODO need to use R_PFS to disable pullups */ \
-    R_PORT##X->PDR = 0; /* select read mode */ \
+    /* R_PORT##X->PDR &= TYPE(~M); */ \
+    set_pfs(bit(4)); /* set PCR */ \
   } \
+}; \
+\
+/* Unmasked port optimizations */ \
+template <uint16_t MASK> \
+struct _Port##X<MASK, true> : _PortBase##X<MASK> { \
+  static_assert(MASK == uint16_t(~0), \
+    "Unmasked port should have all MASK bits set"); \
 \
   static inline void set() { bitwise_or(MASK); } \
   static inline void clear() { bitwise_and(0); } \
@@ -56,35 +71,8 @@ struct _Port##X<M, true> { \
 }; \
 \
 /* Masked port */ \
-template <uint16_t M> \
-struct _Port##X<M, false> { \
-  using TYPE = uint16_t; \
-  static const TYPE MASK = M; \
-\
-  /* Select bit within I/O port */ \
-  template <uint8_t BIT> \
-  using Bit = _Port##X<1 << BIT>; \
-\
-  /* Select masked region within I/O port */ \
-  template <uint8_t SUBMASK> \
-  using Mask = _Port##X<SUBMASK>; \
-\
-  /* Configure port as output */ \
-  static inline void config_output() { \
-    R_PORT##X->PDR |= MASK; \
-  } \
-\
-  /* Configure port as input */ \
-  static inline void config_input() { \
-    R_PORT##X->PDR &= TYPE(~MASK); /* select read mode */ \
-    /* TODO need to use R_PFS to disable pullups */ \
-  } \
-\
-  /* Configure port as input with pullup registers */ \
-  static inline void config_input_pullups() { \
-    /* TODO need to use R_PFS to disable pullups */ \
-    R_PORT##X->PDR &= TYPE(~MASK); /* select read mode */ \
-  } \
+template <uint16_t MASK> \
+struct _Port##X<MASK, false> : _PortBase##X<MASK> { \
 \
   static inline void set() { bitwise_or(MASK); } \
   static inline void clear() { bitwise_and(0); } \
