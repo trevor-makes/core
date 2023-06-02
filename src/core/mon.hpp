@@ -190,44 +190,55 @@ void cmd_export(cli::Args args) {
 // Parse serial data in IHX format
 template <typename API, typename F>
 bool parse_ihx(F&& handle_byte) {
-  for (;;) {
-    // Discard whitespace while looking for start of record (:)
-    char c;
-    do { c = API::input_char(); } while (isspace(c));
-    if (c != ':') return false;
+  auto parse_loop = [&handle_byte]() {
+    for (;;) {
+      // Discard characters while looking for start of record (:)
+      for (;;) {
+        char c = API::input_char();
+        if (c == '\e') return true;
+        if (c == ':') break;
+      }
 
-    // Parse record header and data
-    CORE_INPUT_HEX8(API, rec_size, return false);
-    CORE_INPUT_HEX16(API, address, return false);
-    CORE_INPUT_HEX8(API, rec_type, return false);
-    uint8_t checksum = rec_size + (address >> 8) + (address & 0xFF) + rec_type;
+      // Parse record header and data
+      CORE_INPUT_HEX8(API, rec_size, return false);
+      CORE_INPUT_HEX16(API, address, return false);
+      CORE_INPUT_HEX8(API, rec_type, return false);
+      uint8_t checksum = rec_size + (address >> 8) + (address & 0xFF) + rec_type;
 
-    // Read record data
-    for (uint8_t i = 0; i < rec_size; ++i) {
-      CORE_INPUT_HEX8(API, data, return false);
-      handle_byte(address + i, data);
-      checksum += data;
+      // Read record data
+      for (uint8_t i = 0; i < rec_size; ++i) {
+        CORE_INPUT_HEX8(API, data, return false);
+        handle_byte(address + i, data);
+        checksum += data;
+      }
+
+      // Validate checksum
+      CORE_INPUT_HEX8(API, neg_checksum, return false);
+      if (uint8_t(checksum + neg_checksum) != 0) return false;
+
+      // Exit successfully if record type is not data (00)
+      if (rec_type > 0) {
+        return true;
+      }
     }
+  };
 
-    // Validate checksum
-    CORE_INPUT_HEX8(API, neg_checksum, return false);
-    if (uint8_t(checksum + neg_checksum) != 0) return false;
-
-    // Exit successfully if record type is not data (00)
-    if (rec_type > 0) {
-      return true;
-    }
+  // Catch parse errors until end of record or escape key
+  bool valid = true;
+  while (!parse_loop()) {
+    API::print_char('?');
+    valid = false;
   }
+  return valid;
 }
 
 // Write IHX stream into memory
 template <typename API>
 void cmd_import(cli::Args) {
   API::BUS::config_write();
-  if (!parse_ihx<API>(API::BUS::write_bus)) {
-    // Error parsing IHX
-    API::print_char('?');
-  }
+  bool valid = parse_ihx<API>(API::BUS::write_bus);
+  API::newline();
+  API::print_string(valid ? "OK" : "ERROR");
   API::newline();
   API::BUS::flush_write();
 }
@@ -237,19 +248,14 @@ template <typename API>
 void cmd_verify(cli::Args) {
   API::BUS::config_read();
   bool success = true;
-  auto verify_fn = [&success](uint16_t address, uint8_t data) {
+  bool valid = parse_ihx<API>([&success](uint16_t address, uint8_t data) {
     if (API::BUS::read_bus(address) != data) {
       API::print_char('*');
       success = false;
     }
-  };
-  if (parse_ihx<API>(verify_fn)) {
-    API::newline();
-    API::print_string(success ? "PASS" : "FAIL");
-  } else {
-    // Error parsing IHX
-    API::print_char('?');
-  }
+  });
+  API::newline();
+  API::print_string(valid ? (success ? "PASS" : "FAIL") : "ERROR");
   API::newline();
 }
 
