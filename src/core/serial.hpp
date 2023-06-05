@@ -39,7 +39,7 @@ enum class Color : uint8_t {
 
 class StreamEx : public Stream {
   Stream& stream_;
-  int peek_ = -1;
+  int peek_ = KEY_NONE;
   enum class State : uint8_t {
     RESET,
     ESCAPE, // preceding input was "\e"
@@ -50,12 +50,14 @@ class StreamEx : public Stream {
 
 public:
   // Extended key codes returned by `read`
-  static constexpr int KEY_UP    = 0x100;
-  static constexpr int KEY_DOWN  = 0x101;
-  static constexpr int KEY_RIGHT = 0x102;
-  static constexpr int KEY_LEFT  = 0x103;
-  static constexpr int KEY_END   = 0x104;
-  static constexpr int KEY_HOME  = 0x105;
+  // NOTE byte codes >= F8 are unused by UTF-8
+  static constexpr int KEY_UP    = 0xFFF8;
+  static constexpr int KEY_DOWN  = 0xFFF9;
+  static constexpr int KEY_RIGHT = 0xFFFA;
+  static constexpr int KEY_LEFT  = 0xFFFB;
+  static constexpr int KEY_END   = 0xFFFC;
+  static constexpr int KEY_HOME  = 0xFFFD;
+  static constexpr int KEY_NONE  = 0xFFFF;
 
   StreamEx(Stream& stream): stream_{stream} {}
 
@@ -66,7 +68,7 @@ public:
   // Virtual methods from Stream
   int peek(void) override;
   int read(void) override;
-  int available(void) override { return peek() != -1; }
+  int available(void) override { return peek() != KEY_NONE; }
 
   // Virtual methods from Print
   int availableForWrite(void) override { return stream_.availableForWrite(); }

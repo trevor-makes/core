@@ -9,7 +9,7 @@ namespace serial {
 
 int StreamEx::peek() {
   // Fill peek buffer if empty
-  if (peek_ == -1) {
+  if (peek_ == KEY_NONE) {
     peek_ = read();
   }
   return peek_;
@@ -17,9 +17,9 @@ int StreamEx::peek() {
 
 int StreamEx::read() {
   // If we peeked, consume it
-  if (peek_ != -1) {
+  if (peek_ != KEY_NONE) {
     int c = peek_;
-    peek_ = -1;
+    peek_ = KEY_NONE;
     return c;
   }
 
@@ -27,8 +27,8 @@ int StreamEx::read() {
     // Peek input and return without blocking when none available
     // NOTE need to call stream.read() if we decide to consume the input
     int input = stream_.peek();
-    if (input == -1) {
-      return -1;
+    if (input == KEY_NONE) {
+      return KEY_NONE;
     }
 
     // State machine for handling sequences of control characters

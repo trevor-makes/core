@@ -171,7 +171,7 @@ bool try_read(serial::StreamEx& stream, Cursor& cursor, History& history) {
   using serial::StreamEx;
   int input = stream.read();
   switch (input) {
-  case -1:
+  case StreamEx::KEY_NONE:
     break;
   case StreamEx::KEY_LEFT:
     if (cursor.try_left()) {
