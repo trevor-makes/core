@@ -88,6 +88,15 @@ void format_hex(F&& print, uint32_t n) {
 template <typename F>
 void format_hex32(F&& print, uint32_t n) { format_hex(print, n); }
 
+// Print 8 binary digits with leading zeroes
+template <typename F>
+void format_bin8(F&& print, uint8_t n) {
+  for (uint8_t i = 0; i < 8; ++i) {
+    print((n & 0x80) ? '1' : '0');
+    n <<= 1;
+  }
+}
+
 template <typename F>
 void format_ascii(F&& print, uint8_t c) {
   if (c < ' ' || c >= 0x7F) {
