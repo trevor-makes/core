@@ -1,6 +1,4 @@
-#include <Arduino.h>
-
-#include "core/cli.hpp"
+#include <core.h>
 
 using core::cli::CLI;
 using core::cli::Command;
@@ -14,9 +12,6 @@ void setup() {
   Serial.begin(9600);
   while (!Serial) {}
 }
-
-void do_add(Args);
-void do_echo(Args);
 
 void loop() {
   // command list can be global or static local
