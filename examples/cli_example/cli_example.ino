@@ -24,7 +24,7 @@ void loop() {
     { "add", do_add }, // call do_add when "add" is entered
     { "echo", do_echo }, // call do_echo when "echo" is entered
   };
-  serial_cli.run_once(commands);
+  serial_cli.prompt(commands);
 }
 
 void do_add(Args args) {

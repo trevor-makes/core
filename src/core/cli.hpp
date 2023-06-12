@@ -157,26 +157,26 @@ public:
   HistoryOwner(): History(buffer_) {}
 };
 
-template <uint8_t BUF_SIZE = 80, uint8_t HIST_SIZE = 80, uint8_t PRM_SIZE = 20>
+template <uint8_t BUF_SIZE = 80, uint8_t HIST_SIZE = 80, uint8_t PRE_SIZE = 20>
 class CLI {
   serial::StreamEx& stream_;
   CursorOwner<BUF_SIZE> cursor_;
   HistoryOwner<HIST_SIZE> history_;
-  CursorOwner<PRM_SIZE> prompt_;
+  CursorOwner<PRE_SIZE> prefix_;
 
 public:
   CLI(serial::StreamEx& stream): stream_{stream} {}
 
-  void prompt(const char* str) { prompt_.try_insert(str); }
-  void prompt(char c) { prompt_.try_insert(c); }
+  void prefix(const char* str) { prefix_.try_insert(str); }
+  void prefix(char c) { prefix_.try_insert(c); }
 
   Args read(IdleFn idle_fn = nullptr) {
     cursor_.clear();
-    if (prompt_.length() > 0) {
+    if (prefix_.length() > 0) {
       // Copy editable text into line buffer
-      cursor_.try_insert(prompt_);
+      cursor_.try_insert(prefix_);
       stream_.print(cursor_.contents());
-      prompt_.clear();
+      prefix_.clear();
     }
     while (!try_read(stream_, cursor_, history_)) {
       // Call idle function while waiting for input
@@ -202,7 +202,7 @@ public:
 
   template <uint8_t N>
   void print_help(const Command (&commands)[N]) {
-    stream_.println("Commands:");
+    stream_.println(F("Commands:"));
     for (const Command& command : commands) {
       stream_.println(command.keyword);
     }
@@ -210,7 +210,7 @@ public:
 
   // Display prompt and execute command from stream
   template <char C = '>', uint8_t N>
-  void run_once(const Command (&commands)[N], IdleFn idle_fn = nullptr) {
+  void prompt(const Command (&commands)[N], IdleFn idle_fn = nullptr) {
     // Block while waiting for command entry
     stream_.print(C);
     Args args = read(idle_fn);

@@ -32,8 +32,8 @@ struct Base {
     return c;
   }
 
-  static void prompt_char(char c) { T::get_cli().prompt(c); }
-  static void prompt_string(const char* str) { T::get_cli().prompt(str); }
+  static void prompt_char(char c) { T::get_cli().prefix(c); }
+  static void prompt_string(const char* str) { T::get_cli().prefix(str); }
 
 private:
   static LabelsOwner<LBL_SIZE> labels;
