@@ -14,7 +14,7 @@ using IdleFn = void (*)();
 
 // Function pointer to be called when command string is entered
 struct Command {
-  const char* keyword;
+  const __FlashStringHelper* keyword;
   CommandFn callback;
 };
 
@@ -192,7 +192,7 @@ public:
   bool dispatch(Args args, const Command (&commands)[N]) {
     for (const Command& command : commands) {
       // Run callback function if input matches keyword
-      if (strcmp(args.command(), command.keyword) == 0) {
+      if (strcmp_P(args.command(), (const char*)command.keyword) == 0) {
         command.callback(args);
         return true;
       }
