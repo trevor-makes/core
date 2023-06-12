@@ -2,11 +2,7 @@
 
 #pragma once
 
-#ifdef ENV_NATIVE
-#include "FakeStream.hpp"
-#else
 #include "core/arduino.hpp"
-#endif
 
 #include <stdint.h>
 

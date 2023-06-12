@@ -2,6 +2,11 @@
 
 #pragma once
 
+#ifdef ENV_NATIVE
+#include "test/FakeStream.hpp"
+#include "test/FakePgm.hpp"
+#endif
+
 // TODO maybe there are cases where we don't want to include Arduino.h even if it exists in path
 #if __has_include("Arduino.h")
 

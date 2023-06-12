@@ -2,11 +2,7 @@
 
 #pragma once
 
-#ifdef ENV_NATIVE
-#include "FakePgm.hpp"
-#else
-#include <avr/pgmspace.h>
-#endif
+#include "core/arduino.hpp"
 
 #include <stdint.h>
 #include <stdlib.h>

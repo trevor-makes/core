@@ -13,13 +13,11 @@
 #include <strings.h>
 
 #define PROGMEM
+#define __FlashStringHelper char
+#define F(x) (x)
 
-char pgm_read_byte(const char* ptr) {
-  return *ptr;
-}
+#define pgm_read_byte(ptr) (*(ptr))
+#define pgm_read_ptr(ptr) (*(ptr))
 
-const char* pgm_read_ptr(const char* const* ptr) {
-  return *ptr;
-}
-
+#define strcmp_P strcmp
 #define strcasecmp_P strcasecmp
